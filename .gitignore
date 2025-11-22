@@ -34,4 +34,8 @@
 !/gpl-core/
 !/gpl-core/**
 
+# Allow tracking of blender_addon directory
+!/blender_addon/
+!/blender_addon/**
+
 Original.py

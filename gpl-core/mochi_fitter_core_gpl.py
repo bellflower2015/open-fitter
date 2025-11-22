@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------------
-# Core logic derived from source code originally released by NINE GATES.
-# Copyright (C) [2025] NINE GATES
+# Core logic derived from source code originally released by Nine Gates.
+# Copyright (C) [2025] Nine Gates
 #
 # This file is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

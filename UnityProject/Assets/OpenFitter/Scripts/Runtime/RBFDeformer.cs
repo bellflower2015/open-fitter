@@ -35,17 +35,19 @@ public class RBFDeformer : MonoBehaviour
 {
     public string jsonFilePath = "rbf_data.json";
 
-    // エディタ拡張からアクセスできるようにpublic/SerializeFieldに変更
-    [SerializeField] private Mesh originalMesh;
-    [SerializeField] private Mesh deformedMesh;
-    
-    // ゲッター（エディタ拡張用）
-    public Mesh OriginalMesh => originalMesh;
-    public Mesh DeformedMesh => deformedMesh;
+    // ターゲット情報の定義
+    [System.Serializable]
+    public class TargetMeshInfo
+    {
+        public SkinnedMeshRenderer smr;
+        public Mesh originalMesh;
+        public Mesh deformedMesh;
+    }
 
-    // Job用データ
-    private NativeArray<float3> originalVertices;
-    private NativeArray<float3> deformedVertices;
+    [SerializeField] private List<TargetMeshInfo> targets = new List<TargetMeshInfo>();
+    public List<TargetMeshInfo> Targets => targets;
+
+    // Job用データ (共通)
     private NativeArray<float3> centers;
     private NativeArray<float3> weights;
     private NativeArray<float3> polyWeights;
@@ -65,8 +67,6 @@ public class RBFDeformer : MonoBehaviour
 
     public void DisposeNativeArrays()
     {
-        if (originalVertices.IsCreated) originalVertices.Dispose();
-        if (deformedVertices.IsCreated) deformedVertices.Dispose();
         if (centers.IsCreated) centers.Dispose();
         if (weights.IsCreated) weights.Dispose();
         if (polyWeights.IsCreated) polyWeights.Dispose();
@@ -75,55 +75,69 @@ public class RBFDeformer : MonoBehaviour
     // エディタから「実行」ボタンで呼ばれる一括処理関数
     public void RunDeformationInEditor()
     {
-        // 1. メッシュの準備
-        if (!InitMesh()) return;
+        // 1. メッシュの準備 (子階層を含む全て)
+        InitMeshes();
 
         // 2. データのロード
         if (!LoadRBFData()) return;
 
         // 3. 計算と適用
-        ApplyRBF();
+        ApplyRBFToAll();
     }
 
-    bool InitMesh()
+    void InitMeshes()
     {
-        var mf = GetComponent<MeshFilter>();
-        var smr = GetComponent<SkinnedMeshRenderer>();
+        var smrs = GetComponentsInChildren<SkinnedMeshRenderer>(true);
 
-        if (mf == null && smr == null)
+        // 既存のターゲット情報を保持するためのマップ
+        var existing = new Dictionary<Component, TargetMeshInfo>();
+        foreach (var t in targets)
         {
-            Debug.LogError("MeshFilter or SkinnedMeshRenderer is missing.");
-            return false;
+            if (t.smr != null) existing[t.smr] = t;
         }
 
-        // オリジナルメッシュの取得
-        if (smr != null) originalMesh = smr.sharedMesh;
-        else originalMesh = mf.sharedMesh;
+        targets.Clear();
 
-        if (originalMesh == null)
+        // SkinnedMeshRendererの処理
+        foreach (var smr in smrs)
         {
-            Debug.LogError("Original mesh is missing.");
-            return false;
+            if (existing.TryGetValue(smr, out var info))
+            {
+                // 既存情報の引継ぎ
+                if (info.deformedMesh == null)
+                {
+                    info.deformedMesh = CreatePreviewMesh(info.originalMesh);
+                    smr.sharedMesh = info.deformedMesh;
+                }
+                targets.Add(info);
+            }
+            else
+            {
+                // 新規登録
+                Mesh current = smr.sharedMesh;
+                if (current == null) continue;
+
+                // 既にプレビューメッシュになっている場合はスキップ（二重適用防止）
+                if (current.name.EndsWith("_Preview"))
+                {
+                    Debug.LogWarning($"Skipping {smr.name} because it seems to be already deformed (Mesh: {current.name})");
+                    continue;
+                }
+
+                info = new TargetMeshInfo { smr = smr, originalMesh = current };
+                info.deformedMesh = CreatePreviewMesh(current);
+                smr.sharedMesh = info.deformedMesh;
+                targets.Add(info);
+            }
         }
+    }
 
-        // プレビュー用メッシュの作成
-        // 以前のプレビューメッシュがあれば破棄（メモリリーク防止）
-        if (deformedMesh != null)
-        {
-            // シーンに残らないよう即時破棄
-            if (Application.isPlaying) Destroy(deformedMesh);
-            else DestroyImmediate(deformedMesh);
-        }
-
-        deformedMesh = Instantiate(originalMesh);
-        deformedMesh.name = originalMesh.name + "_Preview";
-        // シーン保存時にこのメッシュを含めない（Assetとして保存するまで）
-        deformedMesh.hideFlags = HideFlags.DontSaveInEditor | HideFlags.DontSaveInBuild;
-        
-        if (smr != null) smr.sharedMesh = deformedMesh;
-        else mf.mesh = deformedMesh;
-
-        return true;
+    Mesh CreatePreviewMesh(Mesh original)
+    {
+        var m = Instantiate(original);
+        m.name = original.name + "_Preview";
+        m.hideFlags = HideFlags.DontSaveInEditor | HideFlags.DontSaveInBuild;
+        return m;
     }
 
     bool LoadRBFData()
@@ -196,22 +210,27 @@ public class RBFDeformer : MonoBehaviour
         return result;
     }
 
-    void ApplyRBF()
+    void ApplyRBFToAll()
     {
-        Vector3[] meshVerts = originalMesh.vertices;
-
-        // NativeArrayの再確保
-        if (!originalVertices.IsCreated || originalVertices.Length != meshVerts.Length)
+        foreach (var target in targets)
         {
-            if (originalVertices.IsCreated) originalVertices.Dispose();
-            if (deformedVertices.IsCreated) deformedVertices.Dispose();
+            if (target.originalMesh == null || target.deformedMesh == null) continue;
             
-            originalVertices = new NativeArray<float3>(meshVerts.Length, Allocator.Persistent);
-            deformedVertices = new NativeArray<float3>(meshVerts.Length, Allocator.Persistent);
+            Transform t = target.smr.transform;
+            ApplyRBF(target.originalMesh, target.deformedMesh, t);
         }
+        Debug.Log($"<color=cyan>[RBF Deformer]</color> Applied to {targets.Count} meshes.");
+    }
+
+    void ApplyRBF(Mesh original, Mesh deformed, Transform targetTransform)
+    {
+        Vector3[] meshVerts = original.vertices;
+
+        // Job用のNativeArray確保 (一時的)
+        var originalVertices = new NativeArray<float3>(meshVerts.Length, Allocator.TempJob);
+        var deformedVertices = new NativeArray<float3>(meshVerts.Length, Allocator.TempJob);
 
         // データのコピー
-        // エディタ実行なのでReinterpretは使わず安全にコピー
         for(int i=0; i<meshVerts.Length; i++) originalVertices[i] = meshVerts[i];
 
         var job = new RBFDeformJob
@@ -222,8 +241,8 @@ public class RBFDeformer : MonoBehaviour
             weights = weights,
             polyWeights = polyWeights,
             epsilon = epsilon,
-            localToWorld = transform.localToWorldMatrix,
-            inverseRotation = Quaternion.Inverse(transform.rotation)
+            localToWorld = targetTransform.localToWorldMatrix,
+            inverseRotation = Quaternion.Inverse(targetTransform.rotation)
         };
 
         // 実行と待機
@@ -233,11 +252,12 @@ public class RBFDeformer : MonoBehaviour
         Vector3[] resultVerts = new Vector3[meshVerts.Length];
         for(int i=0; i<meshVerts.Length; i++) resultVerts[i] = deformedVertices[i];
 
-        deformedMesh.vertices = resultVerts;
-        deformedMesh.RecalculateNormals();
-        deformedMesh.RecalculateBounds();
+        deformed.vertices = resultVerts;
+        deformed.RecalculateNormals();
+        deformed.RecalculateBounds();
         
-        Debug.Log($"<color=cyan>[RBF Deformer]</color> Applied successfully. ({meshVerts.Length} vertices)");
+        originalVertices.Dispose();
+        deformedVertices.Dispose();
     }
 
     [BurstCompile]

@@ -22,14 +22,12 @@ using System.IO;
 public class RBFDeformerEditor : Editor
 {
     private SerializedProperty jsonPathProp;
-    private SerializedProperty originalMeshProp;
-    private SerializedProperty deformedMeshProp;
+    private SerializedProperty targetsProp;
 
     private void OnEnable()
     {
         jsonPathProp = serializedObject.FindProperty("jsonFilePath");
-        originalMeshProp = serializedObject.FindProperty("originalMesh");
-        deformedMeshProp = serializedObject.FindProperty("deformedMesh");
+        targetsProp = serializedObject.FindProperty("targets");
     }
 
     public override void OnInspectorGUI()
@@ -70,13 +68,23 @@ public class RBFDeformerEditor : Editor
             }
         }
         
-        // 状態表示 (エディタ拡張からアクセスするためのReadOnlyフィールド)
+        // 状態表示
         GUILayout.Space(5);
-        EditorGUILayout.LabelField("Current Status:", EditorStyles.miniBoldLabel);
-        GUI.enabled = false; // 読み取り専用にする
-        EditorGUILayout.PropertyField(originalMeshProp, new GUIContent("Original Mesh"));
-        EditorGUILayout.PropertyField(deformedMeshProp, new GUIContent("Deformed Mesh"));
-        GUI.enabled = true;
+        EditorGUILayout.LabelField("Target Meshes:", EditorStyles.miniBoldLabel);
+        
+        if (targetsProp != null)
+        {
+            EditorGUILayout.PropertyField(targetsProp, new GUIContent("Targets"), true);
+            
+            if (deformer.Targets != null && deformer.Targets.Count > 0)
+            {
+                EditorGUILayout.HelpBox($"Found {deformer.Targets.Count} target meshes.", MessageType.Info);
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("No targets found. Click 'Run RBF' to initialize.", MessageType.Warning);
+            }
+        }
         
         serializedObject.ApplyModifiedProperties();
         
@@ -99,89 +107,108 @@ public class RBFDeformerEditor : Editor
         // 3. Export Options
         // ----------------------------------------------------
         
-        bool hasMesh = deformer.DeformedMesh != null;
+        bool hasTargets = deformer.Targets != null && deformer.Targets.Count > 0;
         
-        using (new EditorGUI.DisabledScope(!hasMesh))
+        using (new EditorGUI.DisabledScope(!hasTargets))
         {
             GUILayout.Label("Export Options", EditorStyles.boldLabel);
 
-            if (GUILayout.Button("Save Deformed Mesh (.asset)"))
+            if (GUILayout.Button("Save Deformed Meshes (.asset)"))
             {
-                SaveAsMeshAsset(deformer);
+                SaveAsMeshAssets(deformer);
             }
 
-            if (GUILayout.Button("Create Mesh with BlendShape"))
+            if (GUILayout.Button("Create Meshes with BlendShape"))
             {
-                AddBlendShapeToOriginal(deformer);
+                AddBlendShapeToOriginals(deformer);
             }
         }
     }
 
-    void SaveAsMeshAsset(RBFDeformer deformer)
+    void SaveAsMeshAssets(RBFDeformer deformer)
     {
-        Mesh meshToSave = Instantiate(deformer.DeformedMesh);
-        
-        string path = EditorUtility.SaveFilePanelInProject(
-            "Save Deformed Mesh",
-            deformer.OriginalMesh.name + "_RBF",
-            "asset",
-            "Please enter a file name"
-        );
+        string folderPath = EditorUtility.SaveFolderPanel("Select Folder to Save Meshes", Application.dataPath, "");
+        if (string.IsNullOrEmpty(folderPath)) return;
 
-        if (string.IsNullOrEmpty(path)) return;
-
-        AssetDatabase.CreateAsset(meshToSave, path);
-        AssetDatabase.SaveAssets();
-        
-        Debug.Log($"Saved mesh to: {path}");
-    }
-
-    void AddBlendShapeToOriginal(RBFDeformer deformer)
-    {
-        Mesh original = deformer.OriginalMesh;
-        Mesh deformed = deformer.DeformedMesh;
-
-        Vector3[] origVerts = original.vertices;
-        Vector3[] defVerts = deformed.vertices;
-        
-        if (origVerts.Length != defVerts.Length)
+        // Assets/... の相対パスに変換
+        if (folderPath.StartsWith(Application.dataPath))
         {
-            Debug.LogError("Vertex count mismatch between original and deformed mesh. Cannot create BlendShape.");
+            folderPath = "Assets" + folderPath.Substring(Application.dataPath.Length);
+        }
+        else
+        {
+            Debug.LogError("Please select a folder inside the Assets directory.");
             return;
         }
-        
-        // 差分計算
-        Vector3[] delta = new Vector3[origVerts.Length];
-        for (int i = 0; i < origVerts.Length; i++)
+
+        foreach (var target in deformer.Targets)
         {
-            delta[i] = defVerts[i] - origVerts[i];
+            if (target.deformedMesh == null) continue;
+
+            Mesh meshToSave = Instantiate(target.deformedMesh);
+            string path = Path.Combine(folderPath, target.originalMesh.name + "_RBF.asset");
+            
+            AssetDatabase.CreateAsset(meshToSave, path);
+            Debug.Log($"Saved mesh to: {path}");
         }
-
-        string path = EditorUtility.SaveFilePanelInProject(
-            "Save BlendShape Mesh",
-            original.name + "_BlendShape",
-            "asset",
-            "Save new mesh"
-        );
-
-        if (string.IsNullOrEmpty(path)) return;
-
-        Mesh newMesh = Instantiate(original);
-        newMesh.name = Path.GetFileNameWithoutExtension(path);
-        // AddBlendShapeFrameは法線と接線の差分をnullで渡すことが可能
-        newMesh.AddBlendShapeFrame("RBF_Adjust", 100f, delta, null, null);
-        
-        AssetDatabase.CreateAsset(newMesh, path);
         AssetDatabase.SaveAssets();
+    }
 
-        SkinnedMeshRenderer smr = deformer.GetComponent<SkinnedMeshRenderer>();
-        if (smr != null)
+    void AddBlendShapeToOriginals(RBFDeformer deformer)
+    {
+        string folderPath = EditorUtility.SaveFolderPanel("Select Folder to Save BlendShape Meshes", Application.dataPath, "");
+        if (string.IsNullOrEmpty(folderPath)) return;
+
+        if (folderPath.StartsWith(Application.dataPath))
         {
-            smr.sharedMesh = newMesh;
-            // 新しく追加されたブレンドシェイプを即座に100%適用
-            smr.SetBlendShapeWeight(newMesh.blendShapeCount - 1, 100f);
+            folderPath = "Assets" + folderPath.Substring(Application.dataPath.Length);
         }
-        
-        Debug.Log($"Created BlendShape mesh at: {path}");
+        else
+        {
+            Debug.LogError("Please select a folder inside the Assets directory.");
+            return;
+        }
+
+        foreach (var target in deformer.Targets)
+        {
+            if (target.originalMesh == null || target.deformedMesh == null) continue;
+
+            Mesh original = target.originalMesh;
+            Mesh deformed = target.deformedMesh;
+
+            Vector3[] origVerts = original.vertices;
+            Vector3[] defVerts = deformed.vertices;
+            
+            if (origVerts.Length != defVerts.Length)
+            {
+                Debug.LogError($"Vertex count mismatch for {original.name}. Skipping.");
+                continue;
+            }
+            
+            // 差分計算
+            Vector3[] delta = new Vector3[origVerts.Length];
+            for (int i = 0; i < origVerts.Length; i++)
+            {
+                delta[i] = defVerts[i] - origVerts[i];
+            }
+
+            string path = Path.Combine(folderPath, original.name + "_BlendShape.asset");
+
+            Mesh newMesh = Instantiate(original);
+            newMesh.name = original.name + "_BlendShape";
+            newMesh.AddBlendShapeFrame("RBF_Adjust", 100f, delta, null, null);
+            
+            AssetDatabase.CreateAsset(newMesh, path);
+
+            // 適用
+            if (target.smr != null)
+            {
+                target.smr.sharedMesh = newMesh;
+                target.smr.SetBlendShapeWeight(newMesh.blendShapeCount - 1, 100f);
+            }
+            
+            Debug.Log($"Created BlendShape mesh at: {path}");
+        }
+        AssetDatabase.SaveAssets();
     }
 }

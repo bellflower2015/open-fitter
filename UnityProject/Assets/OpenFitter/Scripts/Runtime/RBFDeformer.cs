@@ -239,13 +239,18 @@ public class RBFDeformer : MonoBehaviour
     void ApplyRBF(Mesh original, Mesh deformed, Transform targetTransform)
     {
         Vector3[] meshVerts = original.vertices;
+        int vertexCount = meshVerts.Length;
 
+        // ---------------------------------------------------------
+        // 1. Base Mesh Deformation
+        // ---------------------------------------------------------
+        
         // Job用のNativeArray確保 (一時的)
-        var originalVertices = new NativeArray<float3>(meshVerts.Length, Allocator.TempJob);
-        var deformedVertices = new NativeArray<float3>(meshVerts.Length, Allocator.TempJob);
+        var originalVertices = new NativeArray<float3>(vertexCount, Allocator.TempJob);
+        var deformedVertices = new NativeArray<float3>(vertexCount, Allocator.TempJob);
 
         // データのコピー
-        for(int i=0; i<meshVerts.Length; i++) originalVertices[i] = meshVerts[i];
+        for(int i=0; i<vertexCount; i++) originalVertices[i] = meshVerts[i];
 
         var job = new RBFDeformJob
         {
@@ -260,18 +265,84 @@ public class RBFDeformer : MonoBehaviour
         };
 
         // 実行と待機
-        job.Schedule(originalVertices.Length, 64).Complete();
+        job.Schedule(vertexCount, 64).Complete();
 
-        // 結果の書き戻し
-        Vector3[] resultVerts = new Vector3[meshVerts.Length];
-        for(int i=0; i<meshVerts.Length; i++) resultVerts[i] = deformedVertices[i];
+        // 結果の書き戻し & ベース変形後の頂点を保持 (シェイプキー計算用)
+        Vector3[] deformedBaseVerts = new Vector3[vertexCount];
+        for(int i=0; i<vertexCount; i++) deformedBaseVerts[i] = deformedVertices[i];
 
-        deformed.vertices = resultVerts;
+        deformed.vertices = deformedBaseVerts;
         deformed.RecalculateNormals();
         deformed.RecalculateBounds();
         
         originalVertices.Dispose();
         deformedVertices.Dispose();
+
+        // ---------------------------------------------------------
+        // 2. BlendShape Deformation
+        // ---------------------------------------------------------
+        // すべてのシェイプキーに対してRBF変形を適用する
+        
+        deformed.ClearBlendShapes();
+        int shapeCount = original.blendShapeCount;
+
+        if (shapeCount > 0)
+        {
+            Vector3[] deltaVerts = new Vector3[vertexCount];
+            Vector3[] deltaNormals = new Vector3[vertexCount];
+            Vector3[] deltaTangents = new Vector3[vertexCount];
+
+            for (int i = 0; i < shapeCount; i++)
+            {
+                string shapeName = original.GetBlendShapeName(i);
+                int frameCount = original.GetBlendShapeFrameCount(i);
+
+                for (int f = 0; f < frameCount; f++)
+                {
+                    float frameWeight = original.GetBlendShapeFrameWeight(i, f);
+                    original.GetBlendShapeFrameVertices(i, f, deltaVerts, deltaNormals, deltaTangents);
+
+                    // シェイプキー適用後の絶対座標を作成
+                    var shapeVerticesNA = new NativeArray<float3>(vertexCount, Allocator.TempJob);
+                    var deformedShapeVerticesNA = new NativeArray<float3>(vertexCount, Allocator.TempJob);
+
+                    for (int v = 0; v < vertexCount; v++)
+                    {
+                        shapeVerticesNA[v] = meshVerts[v] + deltaVerts[v];
+                    }
+
+                    // RBF変形を実行
+                    var shapeJob = new RBFDeformJob
+                    {
+                        vertices = shapeVerticesNA,
+                        deformedVertices = deformedShapeVerticesNA,
+                        centers = centers,
+                        weights = weights,
+                        polyWeights = polyWeights,
+                        epsilon = epsilon,
+                        localToWorld = targetTransform.localToWorldMatrix,
+                        inverseRotation = Quaternion.Inverse(targetTransform.rotation)
+                    };
+                    shapeJob.Schedule(vertexCount, 64).Complete();
+
+                    // 新しいデルタを計算 (変形後シェイプ - 変形後ベース)
+                    Vector3[] newDeltaVerts = new Vector3[vertexCount];
+                    for (int v = 0; v < vertexCount; v++)
+                    {
+                        newDeltaVerts[v] = (Vector3)deformedShapeVerticesNA[v] - deformedBaseVerts[v];
+                    }
+
+                    // 変形されたシェイプキーを追加
+                    // Note: 法線と接線のデルタはRBF変形が困難なため、元の値を維持します。
+                    // 大きな変形の場合、法線が正しくない可能性がありますが、形状は維持されます。
+                    deformed.AddBlendShapeFrame(shapeName, frameWeight, newDeltaVerts, deltaNormals, deltaTangents);
+
+                    shapeVerticesNA.Dispose();
+                    deformedShapeVerticesNA.Dispose();
+                }
+            }
+            Debug.Log($"<color=cyan>[RBF Deformer]</color> Processed {shapeCount} BlendShapes for {original.name}");
+        }
     }
 
     [BurstCompile]

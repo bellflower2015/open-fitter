@@ -89,15 +89,6 @@ class RBFCore:
         self.weights = x[:num_pts]
         self.polynomial_weights = x[num_pts:]
 
-    def create_adaptive_deformation_field(self, source_points, target_points, epsilon, smoothing):
-        """
-        Creates an adaptive deformation field.
-        Currently wraps the standard RBF fitting, but allows for future expansion
-        to adaptive point selection or parameter tuning.
-        """
-        # Future: Implement adaptive sampling or epsilon tuning here
-        return fit_rbf_model(source_points, target_points, epsilon, smoothing)
-
 # ------------------------------------------------------------------------
 # Helper Functions
 # ------------------------------------------------------------------------
@@ -258,6 +249,15 @@ class OPENFITTER_OT_export_rbf_json(bpy.types.Operator):
     
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
     
+    def create_adaptive_deformation_field(self, source_points, target_points, epsilon, smoothing):
+        """
+        Creates an adaptive deformation field.
+        Currently wraps the standard RBF fitting, but allows for future expansion
+        to adaptive point selection or parameter tuning.
+        """
+        # Future: Implement adaptive sampling or epsilon tuning here
+        return fit_rbf_model(source_points, target_points, epsilon, smoothing)
+
     def invoke(self, context, event):
         if not self.filepath:
             blend_filepath = context.blend_data.filepath

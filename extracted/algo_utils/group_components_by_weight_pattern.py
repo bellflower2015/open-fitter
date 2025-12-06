@@ -171,3 +171,8 @@ def group_components_by_weight_pattern(obj, base_avatar_data, clothing_armature)
         return component_patterns
     finally:
         bm.free()
+
+
+def process_weight_patterns(obj, base_avatar_data, clothing_armature):
+    """Thin wrapper to align with other process_* entrypoints."""
+    return group_components_by_weight_pattern(obj, base_avatar_data, clothing_armature)

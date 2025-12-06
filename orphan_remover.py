@@ -3,7 +3,6 @@ import ast
 import collections
 
 TARGET_DIR = './extracted'
-# 削除してはいけないエントリーポイントや重要なファイル
 KEEP_FILES = {'retarget_script2_7', 'main', 'globals'}
 
 
@@ -53,7 +52,6 @@ def main():
         print(f"Directory {TARGET_DIR} not found.")
         return
 
-    # 初期ファイルリスト取得（サブディレクトリ含む）
     files = []
     for root, _, filenames in os.walk(TARGET_DIR):
         for filename in filenames:
@@ -71,8 +69,6 @@ def main():
 
     all_modules = set(module_map.keys())
     
-    # ファイルごとの依存先をキャッシュ (ファイル読み込みは最初の一回だけ)
-    # dependencies[caller] = set(callees)
     file_dependencies = {}
     print(f"Analyzing dependencies for {len(files)} files...")
     
@@ -84,24 +80,18 @@ def main():
         basename = mod_name.split('.')[-1]
         return mod_name in KEEP_FILES or basename in KEEP_FILES
 
-    # シミュレーションループ
-    # 実際に削除するのではなく、セットから除外していくことで連鎖的なOrphanを検出する
     current_modules = set(all_modules)
     total_orphans = []
     
     iteration = 1
     while True:
         referenced_by = collections.defaultdict(int)
-        
-        # 現在有効なモジュール間の参照のみをカウント
         for caller in current_modules:
             deps = file_dependencies.get(caller, set())
             for callee in deps:
-                # calleeも現在有効なモジュールである場合のみカウント
                 if callee in current_modules and callee != caller:
                     referenced_by[callee] += 1
-        
-        # Orphanの特定
+
         current_orphans = []
         for mod in current_modules:
             if is_keep_module(mod):
@@ -116,7 +106,6 @@ def main():
         print(f"Iteration {iteration}: Found {len(current_orphans)} orphans.")
         total_orphans.extend(current_orphans)
         
-        # 次のイテレーションのためにモジュールリストから削除
         for mod in current_orphans:
             current_modules.remove(mod)
             

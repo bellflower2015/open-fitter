@@ -30,7 +30,14 @@ def split():
                 global_assignments.append(segment)
 
     path_hack = "import sys\nimport os\nsys.path.append(os.path.dirname(os.path.abspath(__file__)))\n"
-    header_str = path_hack + "\n".join(common_headers) + "\n\n"
+
+    duplicate_guard = {"import os", "import sys"}
+    filtered_headers = [segment for segment in common_headers if segment.strip() not in duplicate_guard]
+
+    header_parts = [path_hack.rstrip("\n")]
+    if filtered_headers:
+        header_parts.append("\n".join(filtered_headers))
+    header_str = "\n".join(header_parts).rstrip() + "\n\n"
 
     if global_assignments:
         globals_filename = "globals.py"

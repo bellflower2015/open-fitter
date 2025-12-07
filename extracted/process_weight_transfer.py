@@ -71,95 +71,32 @@ class WeightTransferContext:
         self.weights_a = {}
         self.weights_b = {}
 
-    def _build_bone_maps(self):
-        """ヒューマノイドボーンと補助ボーンのマッピングを構築する。"""
+    def run(self):
+        print(f"処理開始: {self.target_obj.name}")
         (
             self.humanoid_to_bone,
             self.bone_to_humanoid,
             self.auxiliary_bones,
             self.auxiliary_bones_to_humanoid,
         ) = build_bone_maps(self.base_avatar_data)
-
-    def detect_finger_vertices(self):
         detect_finger_vertices(self)
-
-    def create_closing_filter_mask(self):
         create_closing_filter_mask(self)
-
-    def attempt_weight_transfer(self, source_obj, vertex_group, max_distance_try=0.2, max_distance_tried=0.0):
-        return attempt_weight_transfer(self, source_obj, vertex_group, max_distance_try, max_distance_tried)
-
-
-
-    def prepare_groups_and_weights(self):
         prepare_groups_and_weights(self)
-
-    def transfer_side_weights(self):
-        return transfer_side_weights(self)
-
-    def _process_mf_group(self, group_name, temp_shape_name, rotation_deg, humanoid_label_left, humanoid_label_right):
-        process_mf_group(self, group_name, temp_shape_name, rotation_deg, humanoid_label_left, humanoid_label_right)
-
-    def run_armpit_process(self):
-        self._process_mf_group("MF_Armpit", "WT_shape_forA.MFTemp", 45, "LeftUpperArm", "RightUpperArm")
-
-    def run_crotch_process(self):
-        self._process_mf_group("MF_crotch", "WT_shape_forCrotch.MFTemp", 70, "LeftUpperLeg", "RightUpperLeg")
-
-    def smooth_and_cleanup(self):
-        smooth_and_cleanup(self)
-
-    def compute_non_humanoid_masks(self):
-        compute_non_humanoid_masks(self)
-
-    def merge_added_groups(self):
-        merge_added_groups(self)
-
-    def store_intermediate_results(self):
-        store_intermediate_results(self)
-
-    def blend_results(self):
-        blend_results(self)
-
-    def adjust_hands_and_propagate(self):
-        adjust_hands_and_propagate(self)
-
-    def compare_side_and_bone_weights(self):
-        compare_side_and_bone_weights(self)
-
-    def run_distance_normal_smoothing(self):
-        run_distance_normal_smoothing(self)
-
-    def apply_distance_falloff_blend(self):
-        apply_distance_falloff_blend(self)
-
-    def restore_head_weights(self):
-        restore_head_weights(self)
-
-    def apply_metadata_fallback(self):
-        apply_metadata_fallback(self)
-
-    def run(self):
-        print(f"処理開始: {self.target_obj.name}")
-        self._build_bone_maps()
-        self.detect_finger_vertices()
-        self.create_closing_filter_mask()
-        self.prepare_groups_and_weights()
-        if not self.transfer_side_weights():
+        if not transfer_side_weights(self):
             return
-        self.run_armpit_process()
-        self.run_crotch_process()
-        self.smooth_and_cleanup()
-        self.compute_non_humanoid_masks()
-        self.merge_added_groups()
-        self.store_intermediate_results()
-        self.blend_results()
-        self.adjust_hands_and_propagate()
-        self.compare_side_and_bone_weights()
-        self.run_distance_normal_smoothing()
-        self.apply_distance_falloff_blend()
-        self.restore_head_weights()
-        self.apply_metadata_fallback()
+        process_mf_group(self, "MF_Armpit", "WT_shape_forA.MFTemp", 45, "LeftUpperArm", "RightUpperArm")
+        process_mf_group(self, "MF_crotch", "WT_shape_forCrotch.MFTemp", 70, "LeftUpperLeg", "RightUpperLeg")
+        smooth_and_cleanup(self)
+        compute_non_humanoid_masks(self)
+        merge_added_groups(self)
+        store_intermediate_results(self)
+        blend_results(self)
+        adjust_hands_and_propagate(self)
+        compare_side_and_bone_weights(self)
+        run_distance_normal_smoothing(self)
+        apply_distance_falloff_blend(self)
+        restore_head_weights(self)
+        apply_metadata_fallback(self)
         total_time = time.time() - self.start_time
         print(f"処理完了: {self.target_obj.name} - 合計時間: {total_time:.2f}秒")
 

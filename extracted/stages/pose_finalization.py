@@ -13,7 +13,7 @@ for _p in (_PARENT_DIR,):
 
 from blender_utils.apply_all_transforms import apply_all_transforms
 from blender_utils.apply_bone_field_delta import apply_bone_field_delta
-from blender_utils.apply_pose_as_rest import apply_pose_as_rest
+from blender_utils.armature_utils import apply_pose_as_rest
 from blender_utils.remove_propagated_weights import remove_propagated_weights
 
 

@@ -30,7 +30,7 @@ from armature_bone_replacer import (
     store_base_bone_parents,
     update_children_parents,
 )
-from blender_utils.apply_pose_as_rest import apply_pose_as_rest
+from blender_utils.armature_utils import apply_pose_as_rest
 from blender_utils.inverse_bone_deform_all_vertices import (
     inverse_bone_deform_all_vertices,
 )

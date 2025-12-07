@@ -7,7 +7,7 @@ import bpy
 from blender_utils.apply_modifiers_keep_shapekeys_with_temp import (
     apply_modifiers_keep_shapekeys_with_temp,
 )
-from blender_utils.armature_modifier_utils import (
+from blender_utils.armature_utils import (
     restore_armature_modifier,
     set_armature_modifier_visibility,
     store_armature_modifier_settings,

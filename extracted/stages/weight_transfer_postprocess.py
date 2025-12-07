@@ -11,7 +11,7 @@ for _p in (_PARENT_DIR,):
     if _p not in sys.path:
         sys.path.append(_p)
 
-from blender_utils.armature_modifier_utils import (
+from blender_utils.armature_utils import (
     set_armature_modifier_target_armature,
     set_armature_modifier_visibility,
 )

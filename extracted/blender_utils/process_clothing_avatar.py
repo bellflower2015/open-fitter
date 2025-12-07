@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import json
 
 import bpy
-from blender_utils.adjust_armature_hips_position import adjust_armature_hips_position
+from blender_utils.armature_utils import adjust_armature_hips_position
 
 
 class _ClothingAvatarContext:

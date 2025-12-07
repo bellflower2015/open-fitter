@@ -10,7 +10,7 @@ import numpy as np
 from blender_utils.apply_modifiers_keep_shapekeys_with_temp import (
     apply_modifiers_keep_shapekeys_with_temp,
 )
-from blender_utils.armature_modifier_utils import set_armature_modifier_visibility
+from blender_utils.armature_utils import set_armature_modifier_visibility
 from io_utils.shape_key_state import restore_shape_key_state, save_shape_key_state
 
 

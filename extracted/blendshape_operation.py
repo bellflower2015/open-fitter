@@ -8,7 +8,7 @@ import numpy as np
 from blender_utils.batch_process_vertices_with_custom_range import (
     batch_process_vertices_with_custom_range,
 )
-from blender_utils.get_armature_from_modifier import get_armature_from_modifier
+from blender_utils.armature_utils import get_armature_from_modifier
 from io_utils.shape_key_state import restore_shape_key_state, save_shape_key_state
 from math_utils.transform_utils import (
     apply_similarity_transform_to_points,

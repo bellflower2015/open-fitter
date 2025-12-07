@@ -15,7 +15,7 @@ for _p in (_PARENT_DIR,):
 from add_pose_from_json import add_pose_from_json
 from algo_utils.vertex_group_utils import remove_empty_vertex_groups
 from blender_utils.bone_utils import apply_bone_name_conversion
-from blender_utils.setup_weight_transfer import setup_weight_transfer
+from blender_utils.weight_transfer_utils import setup_weight_transfer
 from is_A_pose import is_A_pose
 from math_utils.weight_utils import normalize_bone_weights
 from blender_utils.armature_utils import normalize_clothing_bone_names

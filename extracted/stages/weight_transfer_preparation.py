@@ -21,7 +21,7 @@ from blender_utils.armature_utils import (
     store_armature_modifier_settings,
 )
 from blender_utils.weight_processing_utils import process_missing_bone_weights
-from blender_utils.transfer_weights_from_nearest_vertex import (
+from blender_utils.weight_transfer_utils import (
     transfer_weights_from_nearest_vertex,
 )
 from duplicate_mesh_with_partial_weights import duplicate_mesh_with_partial_weights

@@ -13,7 +13,7 @@ for _p in (_PARENT_DIR,):
 
 from add_clothing_pose_from_json import add_clothing_pose_from_json
 from algo_utils.bone_group_utils import create_hinge_bone_group
-from blender_utils.create_overlapping_vertices_attributes import (
+from blender_utils.weight_transfer_utils import (
     create_overlapping_vertices_attributes,
 )
 

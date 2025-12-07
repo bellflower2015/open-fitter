@@ -15,7 +15,7 @@ for _p in (_PARENT_DIR, _GRANDPARENT_DIR):
     if _p not in sys.path:
         sys.path.append(_p)
 
-from blender_utils.transfer_weights_from_nearest_vertex import (
+from blender_utils.weight_transfer_utils import (
     transfer_weights_from_nearest_vertex,
 )
 from io_utils.file_io import import_base_fbx

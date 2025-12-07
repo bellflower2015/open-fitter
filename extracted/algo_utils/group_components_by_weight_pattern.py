@@ -12,7 +12,7 @@ from algo_utils.get_humanoid_and_auxiliary_bone_groups import (
     get_humanoid_and_auxiliary_bone_groups,
 )
 from math_utils.obb_utils import calculate_obb_from_points
-from math_utils.check_mesh_obb_intersection import check_mesh_obb_intersection
+from math_utils.geometry_utils import check_mesh_obb_intersection
 
 
 @dataclass

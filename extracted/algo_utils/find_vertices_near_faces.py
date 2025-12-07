@@ -6,7 +6,7 @@ import math
 
 import bmesh
 import bpy
-from math_utils.barycentric_coords_from_point import barycentric_coords_from_point
+from math_utils.geometry_utils import barycentric_coords_from_point
 from mathutils.bvhtree import BVHTree
 
 

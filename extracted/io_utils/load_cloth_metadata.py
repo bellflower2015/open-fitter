@@ -8,7 +8,7 @@ import bpy
 from algo_utils.find_closest_vertices_brute_force import (
     find_closest_vertices_brute_force,
 )
-from math_utils.calculate_vertices_world import calculate_vertices_world
+from math_utils.geometry_utils import calculate_vertices_world
 
 
 def load_cloth_metadata(filepath):

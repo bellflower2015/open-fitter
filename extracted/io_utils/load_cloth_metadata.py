@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import json
 
 import bpy
-from algo_utils.find_closest_vertices_brute_force import (
+from algo_utils.search_utils import (
     find_closest_vertices_brute_force,
 )
 from math_utils.geometry_utils import calculate_vertices_world

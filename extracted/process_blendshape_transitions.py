@@ -3,7 +3,7 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from algo_utils.find_best_matching_target_settings import (
+from algo_utils.search_utils import (
     find_best_matching_target_settings,
 )
 from algo_utils.get_blendshape_groups import get_blendshape_groups

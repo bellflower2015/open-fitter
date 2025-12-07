@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import json
 
 import bpy
-from algo_utils.find_nearest_parent_with_pose import find_nearest_parent_with_pose
+from algo_utils.search_utils import find_nearest_parent_with_pose
 from apply_initial_pose_to_armature import apply_initial_pose_to_armature
 from blender_utils.clear_humanoid_bone_relations_preserve_pose import (
     clear_humanoid_bone_relations_preserve_pose,

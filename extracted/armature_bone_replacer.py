@@ -11,7 +11,7 @@ from typing import Optional
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import bpy
-from algo_utils.find_humanoid_parent_in_hierarchy import (
+from algo_utils.search_utils import (
     find_humanoid_parent_in_hierarchy,
 )
 from math_utils.transform_utils import copy_bone_transform

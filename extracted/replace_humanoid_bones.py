@@ -13,7 +13,7 @@ from typing import Optional
 import bmesh
 import bpy
 from add_pose_from_json import add_pose_from_json
-from algo_utils.find_humanoid_parent_in_hierarchy import (
+from algo_utils.search_utils import (
     find_humanoid_parent_in_hierarchy,
 )
 from algo_utils.bone_group_utils import (

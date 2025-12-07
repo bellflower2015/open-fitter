@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import json
 
 import bpy
-from algo_utils.find_material_index_from_faces import find_material_index_from_faces
+from algo_utils.search_utils import find_material_index_from_faces
 
 
 def load_mesh_material_data(filepath):

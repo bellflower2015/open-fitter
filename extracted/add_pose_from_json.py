@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import json
 
 import bpy
-from algo_utils.find_nearest_parent_with_pose import find_nearest_parent_with_pose
+from algo_utils.search_utils import find_nearest_parent_with_pose
 from blender_utils.bone_utils import get_humanoid_bone_hierarchy
 from math_utils.transform_utils import list_to_matrix
 

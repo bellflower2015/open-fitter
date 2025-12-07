@@ -17,6 +17,7 @@ from apply_distance_normal_based_smoothing import apply_distance_normal_based_sm
 from blender_utils.adjust_hand_weights import adjust_hand_weights
 from blender_utils.create_blendshape_mask import create_blendshape_mask
 from blender_utils.get_evaluated_mesh import get_evaluated_mesh
+from blender_utils.get_vertex_weight_safe import get_vertex_weight_safe
 from blender_utils.merge_weights_to_parent import merge_weights_to_parent
 from blender_utils.propagate_weights_to_side_vertices import (
     propagate_weights_to_side_vertices,
@@ -247,17 +248,6 @@ class WeightTransferContext:
                     print("Max distance exceeded 1.0, stopping weight transfer attempts")
                     return False, initial_max_distance
         return False, initial_max_distance
-
-    def get_vertex_weight_safe(self, group, vertex_index):
-        if not group:
-            return 0.0
-        try:
-            for g in self.target_obj.data.vertices[vertex_index].groups:
-                if g.group == group.index:
-                    return g.weight
-        except Exception:
-            return 0.0
-        return 0.0
 
     def _propagate_weights_to_side_vertices(self, max_iterations=100):
         """側面ウェイトを持つがボーンウェイトを持たない頂点にウェイトを伝播する。"""
@@ -709,7 +699,7 @@ class WeightTransferContext:
                 group = self.target_obj.vertex_groups[group_name]
                 verts_with_weight = []
                 for v in self.target_obj.data.vertices:
-                    weight = self.get_vertex_weight_safe(group, v.index)
+                    weight = get_vertex_weight_safe(self.target_obj, group, v.index)
                     if weight > 0:
                         verts_with_weight.append(v)
                 print(f"  ウェイトを持つ頂点数: {len(verts_with_weight)}")
@@ -792,7 +782,7 @@ class WeightTransferContext:
                 continue
             group = self.target_obj.vertex_groups[group_name]
             for vert in self.target_obj.data.vertices:
-                weight = self.get_vertex_weight_safe(group, vert.index)
+                weight = get_vertex_weight_safe(self.target_obj, group, vert.index)
                 if weight > 0:
                     for orig_group_name, orig_weight in self.original_humanoid_weights[vert.index].items():
                         if orig_group_name in self.target_obj.vertex_groups:

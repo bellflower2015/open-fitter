@@ -3,11 +3,11 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-import bmesh
-import bpy
 from dataclasses import dataclass, field
 from typing import Dict, List, Set, Tuple
 
+import bmesh
+import bpy
 from algo_utils.create_vertex_neighbors_array import create_vertex_neighbors_array
 from algo_utils.custom_max_vertex_group_numpy import custom_max_vertex_group_numpy
 from algo_utils.get_humanoid_and_auxiliary_bone_groups import (

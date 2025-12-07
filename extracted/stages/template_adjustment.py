@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import bpy
 import mathutils
-from algo_utils.find_vertices_near_faces import find_vertices_near_faces
+from algo_utils.mesh_topology_utils import find_vertices_near_faces
 
 _CURR_DIR = os.path.dirname(os.path.abspath(__file__))
 _PARENT_DIR = os.path.dirname(_CURR_DIR)

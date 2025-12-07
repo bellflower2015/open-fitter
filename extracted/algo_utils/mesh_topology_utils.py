@@ -1,14 +1,19 @@
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-import math
-
+from math_utils.geometry_utils import barycentric_coords_from_point
+from mathutils import Vector
+from mathutils.bvhtree import BVHTree
+from scipy.spatial import cKDTree
 import bmesh
 import bpy
-from math_utils.geometry_utils import barycentric_coords_from_point
-from mathutils.bvhtree import BVHTree
+import math
+import numpy as np
+import os
+import sys
 
+
+# Merged from find_vertices_near_faces.py
 
 class _FindVerticesNearFacesContext:
     """State holder for vertex search and weight transfer."""
@@ -370,3 +375,133 @@ def find_vertices_near_faces(base_mesh, target_mesh, vertex_group_name, max_dist
     )
 
     return ctx.run()
+
+# Merged from create_vertex_neighbors_array.py
+
+def create_vertex_neighbors_array(obj, expand_distance=0.05, sigma=0.02):
+    """
+    各頂点の近接頂点情報を NumPy 配列形式で作成する
+    
+    Parameters:
+        obj: 対象のメッシュオブジェクト
+        expand_distance: 検索範囲（メートル単位）
+        sigma: ガウス関数の標準偏差
+        
+    Returns:
+        neighbors_info (np.ndarray): shape = (M, 2) のフラット配列
+                                    各行は [neighbor_idx, weight_factor]
+        offsets (np.ndarray): shape = (num_verts+1,)
+                              頂点 i の近接データは neighbors_info[offsets[i]:offsets[i+1]] に格納
+        num_verts (int): 頂点数
+    """
+    # 評価済みメッシュを取得
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    eval_obj = obj.evaluated_get(depsgraph)
+    eval_mesh = eval_obj.data
+
+    num_verts = len(eval_mesh.vertices)
+    
+    # 頂点のワールド座標を取得
+    world_coords = [eval_obj.matrix_world @ v.co for v in eval_mesh.vertices]
+    
+    # KDTreeを構築
+    kdtree = cKDTree(world_coords)
+    
+    # ガウス関数
+    def gaussian(distance, sigma):
+        return math.exp(-(distance**2) / (2 * sigma**2))
+    
+    # 近傍頂点リストを作成
+    neighbors_list = [[] for _ in range(num_verts)]
+    for vert_idx, vert_world in enumerate(world_coords):
+        # 範囲内の頂点を検索
+        for idx in kdtree.query_ball_point(vert_world, expand_distance):
+            if idx != vert_idx:
+                dist = (world_coords[idx] - vert_world).length
+                weight_factor = gaussian(dist, sigma)
+                neighbors_list[vert_idx].append((idx, weight_factor))
+    
+    # フラットな配列とオフセット配列を作成
+    # offsets[i] は i 番目頂点の近接配列が始まるインデックスを表す
+    offsets = np.zeros(num_verts+1, dtype=np.int64)
+    for i in range(num_verts):
+        offsets[i+1] = offsets[i] + len(neighbors_list[i])
+    
+    flat_data = []
+    for i in range(num_verts):
+        flat_data.extend(neighbors_list[i])
+    
+    # (neighbor_idx, weight_factor) -> NumPy 配列化
+    neighbors_info = np.array(flat_data, dtype=np.float64)  # shape = (M, 2)
+    # ただし neighbor_idx は整数なので、後で int にキャストして使う
+    
+    return neighbors_info, offsets, num_verts
+
+# Merged from check_edge_direction_similarity.py
+
+def check_edge_direction_similarity(directions1, directions2, angle_threshold=3.0):
+    """
+    2つの頂点のエッジ方向セットが類似しているかをチェックする
+    
+    Parameters:
+        directions1: 1つ目の頂点のエッジ方向ベクトルのリスト
+        directions2: 2つ目の頂点のエッジ方向ベクトルのリスト
+        angle_threshold: 類似と判断する角度の閾値（度）
+        
+    Returns:
+        bool: 少なくとも1つのエッジ方向が類似している場合はTrue
+    """
+    # 孤立頂点（エッジがない）の場合はFalseを返す
+    if not directions1 or not directions2:
+        return False
+    
+    # 角度の閾値をラジアンに変換
+    angle_threshold_rad = math.radians(angle_threshold)
+    
+    # 各方向の組み合わせをチェック
+    for dir1 in directions1:
+        for dir2 in directions2:
+            # 2つの方向ベクトル間の角度を計算
+            dot_product = dir1.dot(dir2)
+            # 内積が1を超えることがあるため、クランプする
+            dot_product = max(min(dot_product, 1.0), -1.0)
+            angle = math.acos(dot_product)
+            
+            # 角度が閾値以下、または180度から閾値を引いた値以上（逆方向も考慮）
+            if angle <= angle_threshold_rad or angle >= (math.pi - angle_threshold_rad):
+                return True
+    
+    return False
+
+# Merged from triangle_utils.py
+
+
+
+
+def triangle_area(triangle: list[Vector]) -> float:
+    """ヘロンの公式を使用して三角形の面積を計算"""
+    a = (triangle[1] - triangle[0]).length
+    b = (triangle[2] - triangle[1]).length
+    c = (triangle[0] - triangle[2]).length
+    s = (a + b + c) / 2  # 半周長
+    # 浮動小数点の誤差による負の値を防ぐため max(..., 0) とする
+    area_val = max(s * (s - a) * (s - b) * (s - c), 0)
+    area = math.sqrt(area_val)
+    return area
+
+
+def is_degenerate_triangle(triangle: list[Vector], epsilon: float = 1e-6) -> bool:
+    """三角形が縮退しているかチェック"""
+    area = triangle_area(triangle)
+    return area < epsilon
+
+
+def calc_triangle_normal(triangle: list[Vector]) -> Vector:
+    """三角形の法線を計算（正規化済み）"""
+    v1 = triangle[1] - triangle[0]
+    v2 = triangle[2] - triangle[0]
+    normal = v1.cross(v2)
+    length = normal.length
+    if length > 1e-8:  # 数値的な安定性のため
+        return normal / length
+    return Vector((0, 0, 0))

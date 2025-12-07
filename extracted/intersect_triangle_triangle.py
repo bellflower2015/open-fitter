@@ -3,7 +3,7 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from math_utils.triangle_utils import calc_triangle_normal, is_degenerate_triangle
+from algo_utils.mesh_topology_utils import calc_triangle_normal, is_degenerate_triangle
 from mathutils import Vector
 
 

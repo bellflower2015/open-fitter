@@ -12,7 +12,7 @@ for _p in (_PARENT_DIR,):
         sys.path.append(_p)
 
 from algo_utils.find_containing_objects import find_containing_objects
-from algo_utils.find_vertices_near_faces import find_vertices_near_faces
+from algo_utils.mesh_topology_utils import find_vertices_near_faces
 from algo_utils.process_humanoid_vertex_groups import process_humanoid_vertex_groups
 from blender_utils.armature_modifier_utils import (
     restore_armature_modifier,

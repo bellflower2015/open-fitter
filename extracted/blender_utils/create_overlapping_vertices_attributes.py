@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import bmesh
 import bpy
-from algo_utils.check_edge_direction_similarity import check_edge_direction_similarity
+from algo_utils.mesh_topology_utils import check_edge_direction_similarity
 from algo_utils.bone_group_utils import (
     get_humanoid_and_auxiliary_bone_groups,
 )

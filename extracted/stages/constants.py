@@ -1,0 +1,47 @@
+FINGER_HUMANOID_BONES = [
+    "LeftIndexProximal", "LeftIndexIntermediate", "LeftIndexDistal",
+    "LeftMiddleProximal", "LeftMiddleIntermediate", "LeftMiddleDistal",
+    "LeftRingProximal", "LeftRingIntermediate", "LeftRingDistal",
+    "LeftLittleProximal", "LeftLittleIntermediate", "LeftLittleDistal",
+    "RightIndexProximal", "RightIndexIntermediate", "RightIndexDistal",
+    "RightMiddleProximal", "RightMiddleIntermediate", "RightMiddleDistal",
+    "RightRingProximal", "RightRingIntermediate", "RightRingDistal",
+    "RightLittleProximal", "RightLittleIntermediate", "RightLittleDistal",
+    "LeftHand", "RightHand",
+]
+
+LEFT_FOOT_FINGER_HUMANOID_BONES = [
+    "LeftFootThumbProximal",
+    "LeftFootThumbIntermediate",
+    "LeftFootThumbDistal",
+    "LeftFootIndexProximal",
+    "LeftFootIndexIntermediate",
+    "LeftFootIndexDistal",
+    "LeftFootMiddleProximal",
+    "LeftFootMiddleIntermediate",
+    "LeftFootMiddleDistal",
+    "LeftFootRingProximal",
+    "LeftFootRingIntermediate",
+    "LeftFootRingDistal",
+    "LeftFootLittleProximal",
+    "LeftFootLittleIntermediate",
+    "LeftFootLittleDistal",
+]
+
+RIGHT_FOOT_FINGER_HUMANOID_BONES = [
+    "RightFootThumbProximal",
+    "RightFootThumbIntermediate",
+    "RightFootThumbDistal",
+    "RightFootIndexProximal",
+    "RightFootIndexIntermediate",
+    "RightFootIndexDistal",
+    "RightFootMiddleProximal",
+    "RightFootMiddleIntermediate",
+    "RightFootMiddleDistal",
+    "RightFootRingProximal",
+    "RightFootRingIntermediate",
+    "RightFootRingDistal",
+    "RightFootLittleProximal",
+    "RightFootLittleIntermediate",
+    "RightFootLittleDistal",
+]

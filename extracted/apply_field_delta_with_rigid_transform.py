@@ -12,7 +12,7 @@ from blender_utils.blendshape_utils import create_blendshape_mask
 from common_utils.get_source_label import get_source_label
 from execute_transitions_with_cache import execute_transitions_with_cache
 from io_utils.shape_key_state import restore_shape_key_state, save_shape_key_state
-from misc_utils.TransitionCache import TransitionCache
+from blender_utils.blendshape_utils import TransitionCache
 
 
 def apply_field_delta_with_rigid_transform(obj, field_data_path, blend_shape_labels=None, base_avatar_data=None, clothing_avatar_data=None, shape_key_name="RigidTransformed", influence_range=1.0, config_data=None, overwrite_base_shape_key=True):

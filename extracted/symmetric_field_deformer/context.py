@@ -7,7 +7,7 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from misc_utils.TransitionCache import TransitionCache
+from blender_utils.blendshape_utils import TransitionCache
 
 
 class SymmetricFieldDeformerContext:

@@ -88,38 +88,49 @@ class OutfitRetargetPipeline:
 
             bpy.ops.object.mode_set(mode='OBJECT')
 
+            is_final_pair = (self.pair_index == self.total_pairs - 1)
+            pair_info = f"[{self.pair_index + 1}/{self.total_pairs}]"
+
             # ファイル読み込み・FBXインポート
+            print(f"Status: {pair_info} アセット読み込み中...")
             AssetLoadingStage(self).run()
             # アセット正規化・初期設定
+            print(f"Status: {pair_info} アセット正規化中...")
             AssetNormalizationStage(self).run()
             # Template専用の調整処理
             if not TemplateAdjustmentStage(self).run():
                 return None
             # BlendShape変形フィールド適用
+            print(f"Status: {pair_info} BlendShape変形フィールド適用中...")
             BlendShapeApplicationStage(self).run()
             # ポーズ適用・頂点属性設定
+            print(f"Status: {pair_info} ポーズ適用中...")
             PoseApplicationStage(self).run()
             # サイクル1: メッシュ変形処理
+            print(f"Status: {pair_info} メッシュ変形処理中...")
             MeshDeformationStage(self).run()
 
-            # ウェイト転送は最終pairでのみ実行（中間pairではbase_meshがないため不要）
-            is_final_pair = (self.pair_index == self.total_pairs - 1)
-            
             # サイクル2: ウェイト転送準備
+            print(f"Status: {pair_info} ウェイト転送準備中...")
             WeightTransferPreparationStage(self).run()
             
             # サイクル2: ウェイト転送本体（最終pairでのみ実行）
             if is_final_pair:
+                print(f"Status: {pair_info} ウェイト転送実行中...")
                 WeightTransferExecutionStage(self).run()
             
             # サイクル2: ウェイト転送後処理（アーマチュア設定復元は常に必要）
+            print(f"Status: {pair_info} ウェイト転送後処理中...")
             WeightTransferPostProcessStage(self).run()
 
             # ポーズ適用・変形の伝搬
+            print(f"Status: {pair_info} ポーズ確定処理中...")
             PoseFinalizationStage(self).run()
             # ヒューマノイドボーン置換
+            print(f"Status: {pair_info} ボーン置換中...")
             BoneReplacementStage(self).run()
             # エクスポート準備・FBX出力
+            print(f"Status: {pair_info} エクスポート処理中...")
             ExportPreparationStage(self).run()
 
             total_time = time.time() - self.start_time

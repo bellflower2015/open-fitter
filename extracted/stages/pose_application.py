@@ -49,7 +49,6 @@ class PoseApplicationStage:
         time = p.time_module
 
         # ポーズ適用
-        print("Status: ポーズ適用中")
         add_clothing_pose_from_json(
             p.clothing_armature,
             p.config_pair['pose_data'],

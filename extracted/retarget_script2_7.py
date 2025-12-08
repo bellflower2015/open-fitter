@@ -19,10 +19,7 @@ def main_v1(args, config_pairs, start_time):
     """
     import time
     
-    print(f"\n{'='*60}")
-    print(f"OutfitRetargetPipeline V1 - is_final_pair最適化版")
-    print(f"{'='*60}")
-    print(f"{'='*60}")
+    print(f"Status: パイプライン開始 ({len(config_pairs)} pair)")
 
     success = True
     for i, config_pair in enumerate(config_pairs):
@@ -49,20 +46,16 @@ def main():
 
         sys.stdout.reconfigure(line_buffering=True)
         
-        print(f"Status: アドオン有効化中")
-        print(f"Progress: 0.01")
+        print(f"Status: 初期化中...")
         bpy.ops.preferences.addon_enable(module='robust-weight-transfer')
         # Parse command line arguments
-        print(f"Status: 引数解析中")
-        print(f"Progress: 0.02")
         args, config_pairs = parse_args()
         # V1パイプラインを実行
         success = main_v1(args, config_pairs, start_time)
         
         total_time = time.time() - start_time
+        print(f"Status: 完了 ({total_time:.1f}秒)")
         print(f"Progress: 1.00")
-        print(f"\n{'='*60}")
-        print(f"{'='*60}")
         
         return success
         

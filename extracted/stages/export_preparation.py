@@ -71,7 +71,6 @@ class ExportPreparationStage:
 
     def _apply_blendshape_settings(self, p, time):
         """ブレンドシェイプ設定を適用"""
-        print("Status: ブレンドシェイプ設定中")
         if "clothingBlendShapeSettings" in p.config_pair['config_data']:
             blend_shape_settings = p.config_pair['config_data']["clothingBlendShapeSettings"]
 
@@ -91,7 +90,6 @@ class ExportPreparationStage:
 
     def _update_cloth_metadata(self, p, time):
         """クロスメタデータを更新"""
-        print("Status: クロスメタデータ更新中")
         if p.args.cloth_metadata and os.path.exists(p.args.cloth_metadata):
             try:
                 with open(p.args.cloth_metadata, 'r', encoding='utf-8') as f:
@@ -107,7 +105,6 @@ class ExportPreparationStage:
 
     def _preprocess_for_export(self, p, time):
         """エクスポート前処理"""
-        print("Status: FBXエクスポート前処理中")
         # BlendShapeラベルの再設定
         p.blend_shape_labels = []
         if p.args.blend_shapes:
@@ -173,5 +170,4 @@ class ExportPreparationStage:
         round_bone_coordinates(p.clothing_armature, decimal_places=6)
 
         # FBXエクスポート
-        print("Status: FBXエクスポート中")
         export_fbx(p.args.output)

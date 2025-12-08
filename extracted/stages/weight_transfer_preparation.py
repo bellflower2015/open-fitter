@@ -74,11 +74,6 @@ class WeightTransferPreparationStage:
         
         # 包含関係検出
         p.containing_objects = find_containing_objects(p.clothing_meshes, threshold=0.04)
-        print(
-            f"Found {sum(len(contained) for contained in p.containing_objects.values())} objects that are contained within others"
-        )
-        # 前処理開始
-        print("Status: サイクル2前処理中")
         # ボーンデータ準備（最終pairのみ）
         if is_final_pair:
             self._apply_sub_bone_data(p)
@@ -94,10 +89,6 @@ class WeightTransferPreparationStage:
         p.armature_settings_dict = {}
         for obj in p.clothing_meshes:
             self._preprocess_mesh(obj, p, time, is_final_pair)
-
-        print(
-            f"config_pair.get('next_blendshape_settings', []): {p.config_pair.get('next_blendshape_settings', [])}"
-        )
 
     def _apply_sub_bone_data(self, p):
         """subHumanoidBones/subAuxiliaryBones を適用"""

@@ -45,7 +45,6 @@ class BlendShapeApplicationStage:
         p = self.pipeline
         time = p.time_module
 
-        print("Status: BlendShape用 Deformation Field適用中")
         # BlendShapeラベルの解析
         p.blend_shape_labels = (
             p.config_pair['blend_shapes'].split(',')

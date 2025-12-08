@@ -45,7 +45,6 @@ class WeightTransferPostProcessStage:
         p = self.pipeline
         time = p.time_module
 
-        print("Status: サイクル2後処理中")
         for obj in p.clothing_meshes:
 
             # アーマチュアモディファイアの可視性を復元

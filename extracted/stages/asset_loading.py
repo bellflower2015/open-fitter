@@ -51,10 +51,8 @@ class AssetLoadingStage:
         is_final_pair = (p.pair_index == p.total_pairs - 1)
 
         # ベースBlendファイル読み込み
-        print("Status: ベースファイル読み込み中")
         load_base_file(p.args.base)
         # ベースアバター処理（最終pairのみFBXをロード、中間pairはavatar_dataのみ）
-        print("Status: ベースアバター処理中")
         if is_final_pair:
             (
                 p.base_mesh,
@@ -72,8 +70,7 @@ class AssetLoadingStage:
             p.base_mesh = None
             p.base_armature = None
 
-        # 衣装アバター処理
-        print("Status: 衣装データ処理中")
+        # 衣装データ処理
         (
             p.clothing_meshes,
             p.clothing_armature,
@@ -96,7 +93,6 @@ class AssetLoadingStage:
         truncate_long_shape_key_names(p.clothing_meshes, p.clothing_avatar_data)
 
         # メタデータ読み込み
-        print("Status: クロスメタデータ読み込み中")
         (
             p.cloth_metadata,
             p.vertex_index_mapping,

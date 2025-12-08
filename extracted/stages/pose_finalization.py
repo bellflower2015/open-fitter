@@ -49,7 +49,6 @@ class PoseFinalizationStage:
         time = p.time_module
 
         # ポーズをレストポーズとして適用（1回目）
-        print("Status: ポーズ適用中")
         apply_pose_as_rest(p.clothing_armature)
         # ボーンフィールドデルタ適用
         apply_bone_field_delta(
@@ -58,10 +57,8 @@ class PoseFinalizationStage:
             p.clothing_avatar_data,
         )
         # ポーズをレストポーズとして適用（2回目）
-        print("Status: ポーズ適用中")
         apply_pose_as_rest(p.clothing_armature)
         # すべての変換を適用
-        print("Status: すべての変換を適用中")
         apply_all_transforms()
         # 伝播ウェイト削除
         for obj in p.clothing_meshes:

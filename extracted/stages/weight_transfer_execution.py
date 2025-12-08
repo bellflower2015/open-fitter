@@ -28,6 +28,10 @@ class WeightTransferExecutionStage:
         - 個別メッシュ: 連結成分正規化付きウェイト転送
         - 重複頂点のウェイト正規化
     
+    ベースメッシュ依存:
+        - 必須（base_meshからウェイトを転送）
+        - 最終pairでのみ実行される
+    
     前提:
         - WeightTransferPreparationStage が完了していること
         - containing_objects が設定されていること
@@ -35,6 +39,9 @@ class WeightTransferExecutionStage:
     成果物:
         - ウェイトが転送された衣装メッシュ
     """
+    
+    # ベースメッシュ依存フラグ: 必須
+    REQUIRES_BASE_MESH = True
 
     def __init__(self, pipeline):
         self.pipeline = pipeline

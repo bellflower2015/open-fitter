@@ -24,6 +24,9 @@ class BlendShapeApplicationStage:
         - BlendShapeラベルの解析
         - 各衣装メッシュへのDeformation Field適用
     
+    ベースメッシュ依存:
+        - 不要（衣装データとfield_dataのみ使用）
+    
     前提:
         - AssetNormalizationStage が完了していること
     
@@ -31,6 +34,9 @@ class BlendShapeApplicationStage:
         - blend_shape_labels リスト
         - BlendShape変形が適用された衣装メッシュ
     """
+    
+    # ベースメッシュ依存フラグ: 不要
+    REQUIRES_BASE_MESH = False
 
     def __init__(self, pipeline):
         self.pipeline = pipeline
@@ -52,9 +58,12 @@ class BlendShapeApplicationStage:
         # BlendShapeラベルがある場合、各メッシュに変形フィールドを適用
         if p.blend_shape_labels:
             for obj in p.clothing_meshes:
-                reset_shape_keys(obj)
-                remove_empty_vertex_groups(obj)
-                normalize_vertex_weights(obj)
+                # 最初のpairでのみシェイプキーリセットと正規化を実行
+                # 2回目以降は累積適用のためスキップ
+                if p.pair_index == 0:
+                    reset_shape_keys(obj)
+                    remove_empty_vertex_groups(obj)
+                    normalize_vertex_weights(obj)
                 apply_blendshape_deformation_fields(
                     obj,
                     p.config_pair['field_data'],
@@ -64,7 +73,9 @@ class BlendShapeApplicationStage:
                 )
 
         blendshape_time = time.time()
-        print(f"BlendShape用 Deformation Field適用: {blendshape_time - p.base_weights_time:.2f}秒")
+        # base_weights_timeがない場合（Phase 1）はstart_timeを使用
+        reference_time = p.base_weights_time if p.base_weights_time else p.start_time
+        print(f"BlendShape用 Deformation Field適用: {blendshape_time - reference_time:.2f}秒")
 
         # 次のステージで使用するためのタイムスタンプを保存
         p.blendshape_time = blendshape_time

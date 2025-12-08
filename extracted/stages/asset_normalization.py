@@ -26,10 +26,14 @@ class AssetNormalizationStage:
     """読み込まれたアセットの正規化と初期設定を行うステージ
     
     責務:
-        - Aポーズ判定とベースポーズ適用
-        - ウェイト転送のセットアップ
+        - Aポーズ判定とベースポーズ適用（最終pairのみ）
+        - ウェイト転送のセットアップ（最終pairのみ）
         - ボーン名の正規化
-        - ベースアバターのウェイト更新・正規化
+        - ベースアバターのウェイト更新・正規化（最終pairのみ）
+    
+    ベースメッシュ依存:
+        - 最終pairでのみbase_mesh/base_armatureを使用
+        - 中間pairではベースメッシュ関連処理をスキップ
     
     前提:
         - AssetLoadingStage が完了していること
@@ -39,6 +43,9 @@ class AssetNormalizationStage:
         - base_weights_time タイムスタンプ
         - リターゲティング計算を開始できる整った状態
     """
+    
+    # ベースメッシュ依存フラグ: 最終pairでのみ必要
+    REQUIRES_BASE_MESH = 'final_pair_only'
 
     def __init__(self, pipeline):
         self.pipeline = pipeline
@@ -47,6 +54,7 @@ class AssetNormalizationStage:
         p = self.pipeline
         time = p.time_module
         stage_start_time = time.time()
+        is_final_pair = (p.pair_index == p.total_pairs - 1)
 
         # Aポーズ判定（最初のペアのみ）
         if p.pair_index == 0:
@@ -68,37 +76,44 @@ class AssetNormalizationStage:
             print("AポーズのためAポーズ用ベースポーズを使用")
             p.base_avatar_data['basePose'] = p.base_avatar_data['basePoseA']
 
-        # ベースポーズ適用
-        base_pose_filepath = p.base_avatar_data.get('basePose', None)
-        if (
-            base_pose_filepath
-            and p.config_pair.get('do_not_use_base_pose', 0) == 0
-        ):
-            pose_dir = os.path.dirname(
-                os.path.abspath(p.config_pair['base_avatar_data'])
-            )
-            base_pose_filepath = os.path.join(pose_dir, base_pose_filepath)
-            print(f"Applying target avatar base pose from {base_pose_filepath}")
-            add_pose_from_json(
-                p.base_armature,
-                base_pose_filepath,
-                p.base_avatar_data,
-                invert=False,
-            )
+        # ベースポーズ適用（最終pairのみ - base_armatureが必要）
+        if is_final_pair:
+            base_pose_filepath = p.base_avatar_data.get('basePose', None)
+            if (
+                base_pose_filepath
+                and p.config_pair.get('do_not_use_base_pose', 0) == 0
+            ):
+                pose_dir = os.path.dirname(
+                    os.path.abspath(p.config_pair['base_avatar_data'])
+                )
+                base_pose_filepath = os.path.join(pose_dir, base_pose_filepath)
+                print(f"Applying target avatar base pose from {base_pose_filepath}")
+                add_pose_from_json(
+                    p.base_armature,
+                    base_pose_filepath,
+                    p.base_avatar_data,
+                    invert=False,
+                )
+        # 中間pairではbase_armatureがNoneのためスキップ
         base_pose_time = time.time()
         print(f"ベースポーズ適用: {base_pose_time - stage_start_time:.2f}秒")
 
-        # ウェイト転送セットアップ
+        # ウェイト転送セットアップ（最終pairのみ - Body.BaseAvatarが必要）
         print("Status: ウェイト転送セットアップ中")
         print(f"Progress: {(p.pair_index + 0.25) / p.total_pairs * 0.9:.3f}")
-        setup_weight_transfer()
+        if is_final_pair:
+            setup_weight_transfer()
+        # 中間pairではBody.BaseAvatarが存在しないためスキップ
         setup_time = time.time()
         print(f"ウェイト転送セットアップ: {setup_time - base_pose_time:.2f}秒")
 
-        # ベースメッシュの空頂点グループを削除
+        # ベースメッシュ処理（最終pairのみ - base_meshが必要）
         print("Status: ベースアバターウェイト更新中")
         print(f"Progress: {(p.pair_index + 0.3) / p.total_pairs * 0.9:.3f}")
-        remove_empty_vertex_groups(p.base_mesh)
+        if is_final_pair:
+            # ベースメッシュの空頂点グループを削除
+            remove_empty_vertex_groups(p.base_mesh)
+        # 中間pairではbase_meshがNoneのためスキップ
 
         # ボーン名変換（最初のペアで、変換ファイルがある場合）
         if (
@@ -123,17 +138,19 @@ class AssetNormalizationStage:
             p.clothing_meshes,
         )
 
-        # ベースアバターのウェイト更新
-        update_base_avatar_weights(
-            p.base_mesh,
-            p.clothing_armature,
-            p.base_avatar_data,
-            p.clothing_avatar_data,
-            preserve_optional_humanoid_bones=True,
-        )
+        # ベースアバターのウェイト更新（最終pairのみ）
+        if is_final_pair:
+            update_base_avatar_weights(
+                p.base_mesh,
+                p.clothing_armature,
+                p.base_avatar_data,
+                p.clothing_avatar_data,
+                preserve_optional_humanoid_bones=True,
+            )
 
-        # ボーンウェイトの正規化
-        normalize_bone_weights(p.base_mesh, p.base_avatar_data)
+            # ボーンウェイトの正規化
+            normalize_bone_weights(p.base_mesh, p.base_avatar_data)
+        # 中間pairではbase_meshがNoneのためスキップ
 
         p.base_weights_time = time.time()
         print(f"ベースアバターウェイト更新: {p.base_weights_time - setup_time:.2f}秒")

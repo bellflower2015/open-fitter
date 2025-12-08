@@ -41,6 +41,11 @@ class MeshDeformationStage:
         - 連結成分ベースのメッシュ処理
         - シェイプキーのマージ
     
+    ベースメッシュ依存:
+        - 不要（衣装データとfield_dataのみ使用）
+        - base_avatar_dataは参照するがbase_meshは不要
+        - Body.BaseAvatarがない場合は距離ウェイト計算をスキップ
+    
     前提:
         - PoseApplicationStage が完了していること
     
@@ -49,6 +54,9 @@ class MeshDeformationStage:
         - cycle1_end_time タイムスタンプ
         - 変形処理が完了した衣装メッシュ
     """
+    
+    # ベースメッシュ依存フラグ: 不要（base_avatar_dataのみ参照）
+    REQUIRES_BASE_MESH = False
 
     def __init__(self, pipeline):
         self.pipeline = pipeline

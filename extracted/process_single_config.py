@@ -101,12 +101,20 @@ class OutfitRetargetPipeline:
             PoseApplicationStage(self).run()
             # サイクル1: メッシュ変形処理
             MeshDeformationStage(self).run()
+
+            # ウェイト転送は最終pairでのみ実行（中間pairではbase_meshがないため不要）
+            is_final_pair = (self.pair_index == self.total_pairs - 1)
+            
             # サイクル2: ウェイト転送準備
             WeightTransferPreparationStage(self).run()
-            # サイクル2: ウェイト転送本体
-            WeightTransferExecutionStage(self).run()
-            # サイクル2: ウェイト転送後処理
+            
+            # サイクル2: ウェイト転送本体（最終pairでのみ実行）
+            if is_final_pair:
+                WeightTransferExecutionStage(self).run()
+            
+            # サイクル2: ウェイト転送後処理（アーマチュア設定復元は常に必要）
             WeightTransferPostProcessStage(self).run()
+
             # ポーズ適用・変形の伝搬
             PoseFinalizationStage(self).run()
             # ヒューマノイドボーン置換

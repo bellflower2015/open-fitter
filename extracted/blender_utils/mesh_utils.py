@@ -385,3 +385,59 @@ def cleanup_base_objects(mesh_name: str) -> tuple:
     
     # Rename objects to specified names
     return rename_base_objects(target_mesh, target_armature)
+
+
+def cleanup_base_objects_preserve_clothing(mesh_name: str, clothing_meshes: list, clothing_armature) -> tuple:
+    """Delete all objects except the specified mesh, its armature, and clothing objects.
+    
+    V2パイプライン用: Phase 2でベースアバターをロードする際に
+    衣装オブジェクトを保持する必要がある。
+    
+    Args:
+        mesh_name: ベースメッシュの名前
+        clothing_meshes: 保持する衣装メッシュのリスト
+        clothing_armature: 保持する衣装アーマチュア
+    
+    Returns:
+        tuple: (target_mesh, target_armature)
+    """
+    
+    original_mode = bpy.context.object.mode
+    bpy.ops.object.mode_set(mode='OBJECT')
+    
+    # Find the mesh and its armature
+    target_mesh = None
+    target_armature = None
+    
+    for obj in bpy.data.objects:
+        if obj.type == 'MESH' and obj.name == mesh_name:
+            target_mesh = obj
+            # Find associated armature through modifiers
+            for modifier in obj.modifiers:
+                if modifier.type == 'ARMATURE':
+                    target_armature = modifier.object
+                    break
+    
+    if not target_mesh:
+        raise Exception(f"Mesh '{mesh_name}' not found")
+    
+    if target_armature and target_armature.parent:
+        original_active = bpy.context.view_layer.objects.active
+        bpy.context.view_layer.objects.active = target_armature
+        bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+        bpy.context.view_layer.objects.active = original_active
+    
+    # Build set of objects to preserve
+    preserve_objects = {target_mesh, target_armature}
+    if clothing_meshes:
+        preserve_objects.update(clothing_meshes)
+    if clothing_armature:
+        preserve_objects.add(clothing_armature)
+    
+    # Delete all other objects
+    for obj in bpy.data.objects[:]:  # Create a copy of the list to avoid modification during iteration
+        if obj not in preserve_objects:
+            bpy.data.objects.remove(obj, do_unlink=True)
+    
+    # Rename objects to specified names
+    return rename_base_objects(target_mesh, target_armature)

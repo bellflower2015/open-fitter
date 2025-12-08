@@ -25,15 +25,22 @@ class AssetLoadingStage:
     
     責務:
         - ベースBlendファイルの読み込み
-        - ベースアバターFBXのインポートと処理
+        - ベースアバターFBXのインポートと処理（最終pairのみ）
         - 衣装アバターFBXのインポートと処理
         - メタデータ（Cloth, Material）の読み込み
+    
+    ベースメッシュ依存:
+        - 最終pairでのみbase_mesh/base_armatureをロード
+        - 中間pairではbase_avatar_data（JSON）のみロード
     
     成果物:
         - base_mesh, base_armature, base_avatar_data
         - clothing_meshes, clothing_armature, clothing_avatar_data
         - cloth_metadata, vertex_index_mapping
     """
+    
+    # ベースメッシュ依存フラグ: 最終pairでのみ必要
+    REQUIRES_BASE_MESH = 'final_pair_only'
 
     def __init__(self, pipeline):
         self.pipeline = pipeline
@@ -41,6 +48,7 @@ class AssetLoadingStage:
     def run(self):
         p = self.pipeline
         time = p.time_module
+        is_final_pair = (p.pair_index == p.total_pairs - 1)
 
         # ベースBlendファイル読み込み
         print("Status: ベースファイル読み込み中")
@@ -49,17 +57,25 @@ class AssetLoadingStage:
         base_load_time = time.time()
         print(f"ベースファイル読み込み: {base_load_time - p.start_time:.2f}秒")
 
-        # ベースアバター処理
+        # ベースアバター処理（最終pairのみFBXをロード、中間pairはavatar_dataのみ）
         print("Status: ベースアバター処理中")
         print(f"Progress: {(p.pair_index + 0.1) / p.total_pairs * 0.9:.3f}")
-        (
-            p.base_mesh,
-            p.base_armature,
-            p.base_avatar_data,
-        ) = process_base_avatar(
-            p.config_pair['base_fbx'],
-            p.config_pair['base_avatar_data'],
-        )
+        if is_final_pair:
+            (
+                p.base_mesh,
+                p.base_armature,
+                p.base_avatar_data,
+            ) = process_base_avatar(
+                p.config_pair['base_fbx'],
+                p.config_pair['base_avatar_data'],
+            )
+        else:
+            # 中間pair: avatar_data（JSON）のみロード、FBXインポートはスキップ
+            # ウェイト転送は最終pairでのみ行うため、中間pairではbase_meshは不要
+            from io_utils.io_utils import load_avatar_data
+            p.base_avatar_data = load_avatar_data(p.config_pair['base_avatar_data'])
+            p.base_mesh = None
+            p.base_armature = None
 
         # 衣装アバター処理
         print("Status: 衣装データ処理中")

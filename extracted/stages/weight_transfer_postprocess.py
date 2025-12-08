@@ -24,6 +24,9 @@ class WeightTransferPostProcessStage:
         - アーマチュアモディファイアの可視性復元
         - アーマチュアターゲットの復元（衣装アーマチュアに戻す）
     
+    ベースメッシュ依存:
+        - 不要（衣装のアーマチュア設定復元のみ）
+    
     前提:
         - WeightTransferExecutionStage が完了していること
     
@@ -31,6 +34,9 @@ class WeightTransferPostProcessStage:
         - cycle2_post_end タイムスタンプ
         - アーマチュア設定が復元された衣装メッシュ
     """
+    
+    # ベースメッシュ依存フラグ: 不要
+    REQUIRES_BASE_MESH = False
 
     def __init__(self, pipeline):
         self.pipeline = pipeline

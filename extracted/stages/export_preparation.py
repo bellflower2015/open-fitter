@@ -36,12 +36,19 @@ class ExportPreparationStage:
         - ボーン座標の丸め
         - FBXエクスポート
     
+    ベースメッシュ依存:
+        - 不要（衣装データのみ使用）
+        - Body.BaseAvatarの名前参照はあるが必須ではない
+    
     前提:
         - BoneReplacementStage が完了していること
     
     成果物:
         - 出力FBXファイル
     """
+    
+    # ベースメッシュ依存フラグ: 不要
+    REQUIRES_BASE_MESH = False
 
     def __init__(self, pipeline):
         self.pipeline = pipeline

@@ -26,6 +26,10 @@ class PoseApplicationStage:
         - 重複頂点属性の設定
         - ヒンジボーングループの作成
     
+    ベースメッシュ依存:
+        - 不要（衣装データとpose_dataのみ使用）
+        - base_avatar_dataは参照するがbase_meshは不要
+    
     前提:
         - BlendShapeApplicationStage が完了していること
     
@@ -33,6 +37,9 @@ class PoseApplicationStage:
         - ポーズが適用された衣装アーマチュア
         - 重複頂点属性が設定された衣装メッシュ
     """
+    
+    # ベースメッシュ依存フラグ: 不要（base_avatar_dataのみ参照）
+    REQUIRES_BASE_MESH = False
 
     def __init__(self, pipeline):
         self.pipeline = pipeline

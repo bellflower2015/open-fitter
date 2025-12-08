@@ -27,6 +27,9 @@ class PoseFinalizationStage:
         - 伝播ウェイト削除
         - 元のボーンデータ復元
     
+    ベースメッシュ依存:
+        - 不要（衣装アーマチュアとfield_dataのみ使用）
+    
     前提:
         - WeightTransferPostProcessStage が完了していること
     
@@ -34,6 +37,9 @@ class PoseFinalizationStage:
         - レストポーズが適用された衣装アーマチュア
         - クリーンアップされたウェイト
     """
+    
+    # ベースメッシュ依存フラグ: 不要
+    REQUIRES_BASE_MESH = False
 
     def __init__(self, pipeline):
         self.pipeline = pipeline

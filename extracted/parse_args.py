@@ -253,7 +253,13 @@ def parse_args():
         if config_pairs[i].get('next_blendshape_settings', None):
             print(f"config_pairs[{i}]['next_blendshape_settings']: {config_pairs[i]['next_blendshape_settings']}")
     
-    # Store configuration pairs in args for later use
+    # 中間pairではbase_fbxを使用しない（最終pairでのみターゲットアバターFBXをロード）
+    # Template.fbx依存を排除するため、中間pairのbase_fbxをNoneに設定
+    if len(config_pairs) >= 2:
+        for i in range(len(config_pairs) - 1):
+            config_pairs[i]['base_fbx'] = None
+    
+    # Store configuration pairs in args for later use (後方互換性)
     args.config_pairs = config_pairs
             
     # Parse hips position if provided
@@ -264,5 +270,6 @@ def parse_args():
         except:
             print("Error: Invalid hips position format. Use x,y,z")
             sys.exit(1)
-            
-    return args
+    
+    # 新アーキテクチャ: (args, config_pairs)を返す
+    return args, config_pairs

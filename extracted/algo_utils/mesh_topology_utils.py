@@ -59,7 +59,7 @@ class _FindVerticesNearFacesContext:
             target_face_indices = _select_target_faces(self.base_mesh_data, base_vertices_in_group, self.use_all_faces)
 
             if not target_face_indices:
-                print("警告: 条件を満たす面が見つかりません")
+                print("[Warning] No faces matching the condition found")
                 return
 
             target_vertex_group = _ensure_target_vertex_group(self.target_mesh, self.vertex_group_name)
@@ -311,7 +311,7 @@ def _build_and_interpolate(
     bvh, vertices, faces, temp_bm = _build_bvh(base_mesh_data, base_world_matrix, target_face_indices)
 
     if not bvh:
-        print("警告: 対象となる面が見つかりません")
+        print("[Warning] No target faces found")
         temp_bm.free()
         return None, None
 

@@ -458,6 +458,6 @@ def process_base_avatar_blendshapes(ctx):
                 )
 
         else:
-            print(f"Warning: Field file not found for blend shape {label}")
+            print(f"[Warning] Field file not found for blend shape {label}")
 
     restore_shape_key_state(ctx.target_obj, original_shape_key_state)

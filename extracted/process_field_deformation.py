@@ -42,7 +42,7 @@ def process_field_deformation(target_obj, field_data_path, blend_shape_labels=No
                     target_avatar_base_shape_key.value = 1.0
                     used_shape_keys.append(target_avatar_base_shape_key_name)
                 else:
-                    print(f"Warning: Shape key {target_avatar_base_shape_key_name} not found")
+                    print(f"[Warning] Shape key {target_avatar_base_shape_key_name} not found")
 
     depsgraph = bpy.context.evaluated_depsgraph_get()
     eval_obj = target_obj.evaluated_get(depsgraph)

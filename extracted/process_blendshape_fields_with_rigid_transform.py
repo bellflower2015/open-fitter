@@ -147,6 +147,6 @@ def process_blendshape_fields_with_rigid_transform(obj, field_data_path, base_av
                         matrix_armature_inv_fallback = matrix_armature_inv
 
             else:
-                print(f"Warning: Field file not found for blend shape {label}")
+                print(f"[Warning] Field file not found for blend shape {label}")
         # 元のシェイプキー設定を復元
         restore_shape_key_state(obj, original_shape_key_state)

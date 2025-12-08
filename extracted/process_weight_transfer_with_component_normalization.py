@@ -72,7 +72,7 @@ def process_weight_transfer_with_component_normalization(target_obj, armature, b
     if component_patterns:
         obb_data = _collect_obb_data(ctx)
         if not obb_data:
-            print("警告: 有効なOBBデータがありません。処理をスキップします。")
+            print("[Warning] No valid OBB data available. Skipping processing.")
             return
 
         _process_obb_groups(ctx)

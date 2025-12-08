@@ -34,7 +34,7 @@ def apply_field_delta_with_rigid_transform_single(obj, field_data_path, blend_sh
                 target_avatar_base_shape_key.value = 1.0
                 used_shape_keys.append(target_avatar_base_shape_key_name)
             else:
-                print(f"Warning: Shape key {target_avatar_base_shape_key_name} not found")
+                print(f"[Warning] Shape key {target_avatar_base_shape_key_name} not found")
     
     # 評価済みメッシュから頂点位置（元の状態）を取得
     depsgraph = bpy.context.evaluated_depsgraph_get()

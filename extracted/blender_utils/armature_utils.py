@@ -93,13 +93,13 @@ def adjust_armature_hips_position(armature_obj: bpy.types.Object, target_positio
             break
             
     if not hips_bone_name:
-        print("Warning: Hips bone not found in avatar data")
+        print("[Warning] Hips bone not found in avatar data")
         return
         
     # 現在のHipsボーンのワールド座標を取得
     pose_bone = armature_obj.pose.bones.get(hips_bone_name)
     if not pose_bone:
-        print(f"Warning: Bone {hips_bone_name} not found in armature")
+        print(f"[Warning] Bone {hips_bone_name} not found in armature")
         return
         
     current_position = armature_obj.matrix_world @ pose_bone.head
@@ -171,7 +171,7 @@ def apply_pose_as_rest(armature):
     
     # 指定されたアーマチュアを取得
     if not armature or armature.type != 'ARMATURE':
-        print(f"Error: {armature.name} is not a valid armature object")
+        print(f"[Error] {armature.name} is not a valid armature object")
         return
     
     # アーマチュアをアクティブに設定
@@ -224,7 +224,7 @@ def normalize_clothing_bone_names(clothing_armature: bpy.types.Object, clothing_
         # Extract alphabetic characters and convert to lowercase
         normalized_pattern = re.sub(r'[^a-zA-Z]', '', original_bone_name).lower()
         if not normalized_pattern:
-            print(f"Warning: No alphabetic characters found in bone name '{original_bone_name}'")
+            print(f"[Warning] No alphabetic characters found in bone name '{original_bone_name}'")
             continue
             
         
@@ -239,7 +239,7 @@ def normalize_clothing_bone_names(clothing_armature: bpy.types.Object, clothing_
         if matching_bone:
             bone_name_changes[matching_bone] = original_bone_name
         else:
-            print(f"Warning: No matching bone found for '{original_bone_name}' (pattern: '{normalized_pattern}')")
+            print(f"[Warning] No matching bone found for '{original_bone_name}' (pattern: '{normalized_pattern}')")
     
     # Update vertex group names in all clothing meshes
     if bone_name_changes:

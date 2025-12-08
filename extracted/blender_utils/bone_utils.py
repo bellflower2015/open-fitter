@@ -216,7 +216,7 @@ def round_bone_coordinates(armature: bpy.types.Object, decimal_places: int = 6) 
         decimal_places: 四捨五入する小数点以下の桁数 (デフォルト: 6)
     """
     if not armature or armature.type != 'ARMATURE':
-        print(f"Warning: Invalid armature object for rounding bone coordinates")
+        print(f"[Warning] Invalid armature object for rounding bone coordinates")
         return
     
     # エディットモードに切り替え

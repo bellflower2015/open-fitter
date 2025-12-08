@@ -115,7 +115,7 @@ class _ClothingAvatarContext:
         for mesh_name, parent_name in self.mesh_renderers.items():
             mesh_obj = next((obj for obj in bpy.data.objects if obj.type == 'MESH' and obj.name == mesh_name), None)
             if not mesh_obj:
-                print(f"Warning: Mesh object '{mesh_name}' not found")
+                print(f"[Warning] Mesh object '{mesh_name}' not found")
                 continue
 
             has_armature = any(modifier.type == 'ARMATURE' for modifier in mesh_obj.modifiers)
@@ -130,7 +130,7 @@ class _ClothingAvatarContext:
             if bone_found:
                 self._set_parent_bone(mesh_obj, parent_name)
             else:
-                print(f"Warning: Bone '{parent_name}' not found in clothing_armature for mesh '{mesh_name}'")
+                print(f"[Warning] Bone '{parent_name}' not found in clothing_armature for mesh '{mesh_name}'")
 
     def restore_active(self):
         bpy.context.view_layer.objects.active = self.original_active

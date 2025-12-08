@@ -71,7 +71,7 @@ def remove_propagated_weights(mesh_obj: bpy.types.Object, temp_group_name: str) 
             break
     
     if not armature_obj:
-        print(f"Warning: No armature modifier found in {mesh_obj.name}")
+        print(f"[Warning] No armature modifier found in {mesh_obj.name}")
         return
     
     # アーマチュアのすべてのボーン名を取得
@@ -365,7 +365,7 @@ def propagate_bone_weights(mesh_obj: bpy.types.Object, temp_group_name: str = "P
             break
     
     if not armature_obj:
-        print(f"Warning: No armature modifier found in {mesh_obj.name}")
+        print(f"[Warning] No armature modifier found in {mesh_obj.name}")
         return None
     
     # アーマチュアのすべてのボーン名を取得
@@ -786,7 +786,7 @@ def adjust_hand_weights(target_obj, armature, base_avatar_data):
                             except RuntimeError:
                                 continue
             else:
-                print(f"Warning: No suitable LowerArm bone found for {side} hand")
+                print(f"[Warning] No suitable LowerArm bone found for {side} hand")
 
     # 両手の処理を実行
     process_hand(is_right=True)

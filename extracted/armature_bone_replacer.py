@@ -193,7 +193,7 @@ def parent_original_bones_to_new(
             if matched_new_bone:
                 orig_bone.parent = matched_new_bone
             else:
-                print(f"Warning: No matching new bone found for parent humanoid bone {parent_humanoid_name}")
+                print(f"[Warning] No matching new bone found for parent humanoid bone {parent_humanoid_name}")
         else:
             # Fallback to original matching logic
             matched_new_bone = _find_new_bone_by_humanoid_name(
@@ -202,7 +202,7 @@ def parent_original_bones_to_new(
             if matched_new_bone:
                 orig_bone.parent = matched_new_bone
             else:
-                print(f"Warning: No matching new bone found for humanoid bone {humanoid_name}")
+                print(f"[Warning] No matching new bone found for humanoid bone {humanoid_name}")
 
 
 def _find_new_bone_by_humanoid_name(

@@ -59,23 +59,23 @@ def normalize_vertex_weights(obj):
         obj: 正規化するメッシュオブジェクト
     """
     if obj.type != 'MESH':
-        print(f"Error: {obj.name} is not a mesh object")
+        print(f"[Error] {obj.name} is not a mesh object")
         return
 
     # 頂点グループが存在するか確認
     if not obj.vertex_groups:
-        print(f"Warning: {obj.name} has no vertex groups")
+        print(f"[Warning] {obj.name} has no vertex groups")
         return
         
     # 各頂点が少なくとも1つのグループに属しているか確認
     for vert in obj.data.vertices:
         if not vert.groups:
-            print(f"Warning: Vertex {vert.index} in {obj.name} has no weights")
+            print(f"[Warning] Vertex {vert.index} in {obj.name} has no weights")
     
     # Armatureモディファイアの確認
     has_armature = any(mod.type == 'ARMATURE' for mod in obj.modifiers)
     if not has_armature:
-        print(f"Error: {obj.name} has no Armature modifier")
+        print(f"[Error] {obj.name} has no Armature modifier")
         return
     
     # すべての選択を解除
@@ -155,11 +155,11 @@ def calculate_distance_based_weights(source_obj_name, target_obj_name, vertex_gr
     target_obj = bpy.data.objects.get(target_obj_name)
     
     if not source_obj:
-        print(f"エラー: オブジェクト '{source_obj_name}' が見つかりません")
+        print(f"[Error] Object '{source_obj_name}' not found")
         return False
     
     if not target_obj:
-        print(f"エラー: オブジェクト '{target_obj_name}' が見つかりません")
+        print(f"[Error] Object '{target_obj_name}' not found")
         return False
     
     # メッシュデータを取得
@@ -306,7 +306,7 @@ class _OverlapNormalizationContext:
     def process_all(self):
         if not self.valid_meshes:
             print(
-                f"警告: {self.overlap_attr_name}と{self.world_pos_attr_name}属性を持つメッシュが見つかりません。処理をスキップします。"
+                f"[Warning] No mesh found with {self.overlap_attr_name} and {self.world_pos_attr_name} attributes. Skipping."
             )
             return
 
@@ -500,13 +500,13 @@ def create_distance_falloff_transfer_mask(obj: bpy.types.Object,
     """
     # 入力チェック
     if obj.type != 'MESH':
-        print(f"Error: {obj.name} is not a mesh object")
+        print(f"[Error] {obj.name} is not a mesh object")
         return None
 
     # ソースオブジェクト(Body.BaseAvatar)の取得
     source_obj = bpy.data.objects.get("Body.BaseAvatar")
     if not source_obj:
-        print("Error: Body.BaseAvatar not found")
+        print("[Error] Body.BaseAvatar not found")
         return None
 
     # モディファイア適用後のターゲットメッシュを取得

@@ -134,7 +134,7 @@ def create_blendshape_mask(target_obj, mask_bones, clothing_avatar_data, field_n
             break
             
     if not armature_obj:
-        print(f"Warning: No armature found for {target_obj.name}")
+        print(f"[Warning] No armature found for {target_obj.name}")
         return mask_weights
 
     # Humanoidボーン名からボーン名への変換マップを作成

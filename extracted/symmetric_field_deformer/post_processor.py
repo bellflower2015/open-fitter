@@ -85,7 +85,7 @@ def apply_masks_and_cleanup(ctx):
                     )
                     additional_shape_key.data[i].co += shape_diff
             else:
-                print(f"Warning: {additionalshape_key_name} is not found in shape keys")
+                print(f"[Warning] {additionalshape_key_name} is not found in shape keys")
 
     bpy.ops.object.mode_set(mode="EDIT")
     bpy.ops.mesh.select_all(action="SELECT")
@@ -103,7 +103,7 @@ def apply_masks_and_cleanup(ctx):
                 bpy.ops.mesh.blend_from_shape(shape=ctx.shape_key_name, blend=-1, add=True)
             else:
                 print(
-                    f"Warning: {ctx.shape_key_name} or {ctx.shape_key_name}_original is not found in shape keys"
+                    f"[Warning] {ctx.shape_key_name} or {ctx.shape_key_name}_original is not found in shape keys"
                 )
 
     bpy.context.object.active_shape_key_index = basis_index
@@ -131,9 +131,9 @@ def apply_masks_and_cleanup(ctx):
                     f"Removed shape key: {unused_shape_key_name} from {ctx.target_obj.name}"
                 )
             else:
-                print(f"Warning: {unused_shape_key_name} is not found in shape keys")
+                print(f"[Warning] {unused_shape_key_name} is not found in shape keys")
         else:
-            print(f"Warning: {unused_shape_key_name} is not found in shape keys")
+            print(f"[Warning] {unused_shape_key_name} is not found in shape keys")
 
     if ctx.config_generated_shape_keys:
         print(

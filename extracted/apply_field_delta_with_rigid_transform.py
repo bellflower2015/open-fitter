@@ -281,7 +281,7 @@ def apply_field_delta_with_rigid_transform(obj, field_data_path, blend_shape_lab
                     obj.active_shape_key_index = obj.data.shape_keys.key_blocks.find(sk.name)
                     bpy.ops.mesh.blend_from_shape(shape=shape_key_name, blend=-1, add=True)
                 else:
-                    print(f"Warning: {shape_key_name} or {shape_key_name}_original is not found in shape keys")
+                    print(f"[Warning] {shape_key_name} or {shape_key_name}_original is not found in shape keys")
 
         bpy.context.object.active_shape_key_index = basis_index
         bpy.ops.mesh.blend_from_shape(shape=shape_key_name, blend=1, add=True)
@@ -335,8 +335,8 @@ def apply_field_delta_with_rigid_transform(obj, field_data_path, blend_shape_lab
             if unused_shape_key:
                 obj.shape_key_remove(unused_shape_key)
             else:
-                print(f"Warning: {unused_shape_key_name} is not found in shape keys")
+                print(f"[Warning] {unused_shape_key_name} is not found in shape keys")
         else:
-            print(f"Warning: {unused_shape_key_name} is not found in shape keys")
+            print(f"[Warning] {unused_shape_key_name} is not found in shape keys")
     
     return shape_key, config_blend_shape_labels

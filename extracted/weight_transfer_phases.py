@@ -236,7 +236,7 @@ def _collect_obb_data(ctx: WeightTransferContext):
 
             obb = calculate_obb_from_points(cluster_coords)
             if obb is None:
-                print(f"警告: パターン {new_pattern} のクラスター {cluster_idx} のOBB計算に失敗しました。スキップします。")
+                print(f"[Warning] OBB calculation failed for pattern {new_pattern}, cluster {cluster_idx}. Skipping.")
                 continue
 
             obb['radii'] = [radius * 1.3 for radius in obb['radii']]

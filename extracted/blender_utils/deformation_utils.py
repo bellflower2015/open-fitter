@@ -517,7 +517,7 @@ def create_deformation_mask(obj: bpy.types.Object, avatar_data: dict) -> None:
     """
     # 入力チェック
     if obj.type != 'MESH':
-        print(f"Error: {obj.name} is not a mesh object")
+        print(f"[Error] {obj.name} is not a mesh object")
         return
     
     # Get bone groups from avatar data

@@ -405,7 +405,7 @@ def calculate_obb_from_points(points):
     
     # 点群が少なすぎる場合はNoneを返す
     if len(points) < 3:
-        print(f"警告: 点群が少なすぎます（{len(points)}点）。OBB計算をスキップします。")
+        print(f"[Warning] Too few points ({len(points)} points). Skipping OBB calculation.")
         return None
     
     try:
@@ -423,7 +423,7 @@ def calculate_obb_from_points(points):
         
         # 行列のランクをチェック
         if np.linalg.matrix_rank(cov_matrix) < 3:
-            print("警告: 共分散行列のランクが不足しています。OBB計算をスキップします。")
+            print("[Warning] Covariance matrix rank is insufficient. Skipping OBB calculation.")
             return None
         
         # 固有値と固有ベクトルを計算
@@ -431,7 +431,7 @@ def calculate_obb_from_points(points):
         
         # 固有値が非常に小さい場合はスキップ
         if np.any(np.abs(eigenvalues) < 1e-10):
-            print("警告: 固有値が非常に小さいです。OBB計算をスキップします。")
+            print("[Warning] Eigenvalues are too small. Skipping OBB calculation.")
             return None
         
         # 固有値の大きさでソート（降順）

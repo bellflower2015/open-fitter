@@ -170,7 +170,7 @@ def execute_transitions_with_cache(deferred_transitions, transition_cache, targe
             operation = operations[operation_index]
             changing_shape_key = operation.get('blend_shape', '')
             if not changing_shape_key:
-                print(f"Warning: No target blend_shape found in operation for {operation_index}")
+                print(f"[Warning] No target blend_shape found in operation for {operation_index}")
                 continue
             
             # operationのto_valueを取得してBlendShape値を更新
@@ -178,7 +178,7 @@ def execute_transitions_with_cache(deferred_transitions, transition_cache, targe
             if 'to_value' in operation:
                 target_blendshape_values[changing_shape_key] = operation['to_value']
             else:
-                print(f"Warning: No to_value found in operation for {changing_shape_key}")
+                print(f"[Warning] No to_value found in operation for {changing_shape_key}")
                 continue
             
             # ターゲットBlendShapeを取得
@@ -295,7 +295,7 @@ def execute_transitions_with_cache(deferred_transitions, transition_cache, targe
                 created_shape_key_names.append(shape_key_to_use)
                 shape_key_created = True
             else:
-                print(f"Warning: Basis shape key {shape_key_to_use} not found")
+                print(f"[Warning] Basis shape key {shape_key_to_use} not found")
         
         if target_shape_key is None:
             continue

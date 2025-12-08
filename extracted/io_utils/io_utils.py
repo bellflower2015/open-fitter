@@ -113,7 +113,7 @@ def load_cloth_metadata(filepath):
                         break
                 
                 if not mesh_obj:
-                    print(f"Warning: Mesh {mesh_name} not found")
+                    print(f"[Warning] Mesh {mesh_name} not found")
                     continue
                 
                 # Unityのワールド座標をBlenderのワールド座標に変換
@@ -155,7 +155,7 @@ def load_cloth_metadata(filepath):
                 unmapped_indices = set(range(len(vertices_world))) - mapped_indices
                 
                 if unmapped_indices:
-                    print(f"Warning: Could not map {len(unmapped_indices)} vertices")
+                    print(f"[Warning] Could not map {len(unmapped_indices)} vertices")
                     
                     # デバッグ用の頂点グループを作成
                     debug_group_name = "DEBUG_UnmappedVertices"
@@ -211,7 +211,7 @@ def load_mesh_material_data(filepath):
     from algo_utils.search_utils import find_material_index_from_faces
 
     if not filepath or not os.path.exists(filepath):
-        print("Warning: Mesh material data file not found or not specified")
+        print("[Warning] Mesh material data file not found or not specified")
         return
         
     try:
@@ -228,7 +228,7 @@ def load_mesh_material_data(filepath):
                         break
                 
                 if not mesh_obj:
-                    print(f"Warning: Mesh {mesh_name} not found in Blender scene")
+                    print(f"[Warning] Mesh {mesh_name} not found in Blender scene")
                     continue
                 
                 # 各サブメッシュを処理
@@ -459,7 +459,7 @@ def restore_vertex_weights(mesh_obj: bpy.types.Object, weights_data: dict) -> No
     custom_attr_name = "original_vertex_id"
     
     if custom_attr_name not in mesh.attributes:
-        print(f"Warning: Custom attribute '{custom_attr_name}' not found in {mesh_obj.name}. Using direct index mapping.")
+        print(f"[Warning] Custom attribute '{custom_attr_name}' not found in {mesh_obj.name}. Using direct index mapping.")
         # カスタム属性がない場合は従来の方法でインデックスを直接使用
         for vert_index, vertex_weights_dict in vertex_weights.items():
             if vert_index < len(mesh.vertices):
@@ -541,13 +541,13 @@ def update_cloth_metadata(metadata_dict: dict, output_path: str, vertex_index_ma
         mesh_obj = bpy.data.objects.get(mesh_name)
         
         if not mesh_obj or mesh_obj.type != 'MESH':
-            print(f"Warning: Mesh {mesh_name} not found")
+            print(f"[Warning] Mesh {mesh_name} not found")
             continue
             
         # このメッシュのマッピング情報を取得
         mesh_mapping = vertex_index_mapping.get(mesh_name, {})
         if not mesh_mapping:
-            print(f"Warning: No vertex mappings found for {mesh_name}")
+            print(f"[Warning] No vertex mappings found for {mesh_name}")
             continue
             
         # 評価済みメッシュを取得（モディファイア適用後の状態）
@@ -569,7 +569,7 @@ def update_cloth_metadata(metadata_dict: dict, output_path: str, vertex_index_ma
                 data["position"]["y"] = world_pos.z
                 data["position"]["z"] = -world_pos.y
             else:
-                print(f"Warning: No mapping found for Unity vertex {i} in {mesh_name}")
+                print(f"[Warning] No mapping found for Unity vertex {i} in {mesh_name}")
 
 
     # 更新したデータを保存

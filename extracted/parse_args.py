@@ -46,7 +46,7 @@ def parse_args():
     
     # Validate that base-fbx and config have the same number of entries
     if len(base_fbx_paths) != len(config_paths):
-        print(f"Error: Number of base-fbx files ({len(base_fbx_paths)}) must match number of config files ({len(config_paths)})")
+        print(f"[Error] Number of base-fbx files ({len(base_fbx_paths)}) must match number of config files ({len(config_paths)})")
         sys.exit(1)
     
     # Validate basic file paths
@@ -139,16 +139,16 @@ def parse_args():
             
             # Validate avatar data paths
             if not os.path.exists(pose_data_path):
-                print(f"Error: Pose data file not found: {pose_data_path} (from config {config_path})")
+                print(f"[Error] Pose data file not found: {pose_data_path} (from config {config_path})")
                 sys.exit(1)
             if not os.path.exists(field_data_path):
-                print(f"Error: Field data file not found: {field_data_path} (from config {config_path})")
+                print(f"[Error] Field data file not found: {field_data_path} (from config {config_path})")
                 sys.exit(1)
             if not os.path.exists(base_avatar_data_path):
-                print(f"Error: Base avatar data file not found: {base_avatar_data_path} (from config {config_path})")
+                print(f"[Error] Base avatar data file not found: {base_avatar_data_path} (from config {config_path})")
                 sys.exit(1)
             if not os.path.exists(clothing_avatar_data_path):
-                print(f"Error: Clothing avatar data file not found: {clothing_avatar_data_path} (from config {config_path})")
+                print(f"[Error] Clothing avatar data file not found: {clothing_avatar_data_path} (from config {config_path})")
                 sys.exit(1)
             
             hips_position = None
@@ -250,7 +250,7 @@ def parse_args():
             x, y, z = map(float, args.hips_position.split(','))
             args.hips_position = Vector((x, y, z))
         except:
-            print("Error: Invalid hips position format. Use x,y,z")
+            print("[Error] Invalid hips position format. Use x,y,z")
             sys.exit(1)
     
     # 新アーキテクチャ: (args, config_pairs)を返す

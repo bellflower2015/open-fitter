@@ -179,6 +179,6 @@ def apply_blendshape_deformation_fields(target_obj, field_data_path, blend_shape
                             matrix_armature_inv_fallback = matrix_armature_inv
 
             else:
-                print(f"Warning: Field file not found for blend shape {label}")
+                print(f"[Warning] Field file not found for blend shape {label}")
         else:
-            print(f"Warning: No field data found for blend shape {label}")
+            print(f"[Warning] No field data found for blend shape {label}")

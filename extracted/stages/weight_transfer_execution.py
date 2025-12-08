@@ -50,10 +50,6 @@ class WeightTransferExecutionStage:
         p = self.pipeline
         time = p.time_module
 
-        print("Status: サイクル2ウェイト転送中")
-        print(f"Progress: {(p.pair_index + 0.6) / p.total_pairs * 0.9:.3f}")
-
-        weight_transfer_start = time.time()
         weight_transfer_processed = set()
 
         # 包含関係があるメッシュのウェイト転送
@@ -61,7 +57,6 @@ class WeightTransferExecutionStage:
             if obj in weight_transfer_processed:
                 continue
 
-            obj_start = time.time()
             if obj in p.containing_objects and p.containing_objects[obj]:
                 contained_objects = p.containing_objects[obj]
                 print(
@@ -83,15 +78,10 @@ class WeightTransferExecutionStage:
                 weight_transfer_processed.add(obj)
                 weight_transfer_processed.update(contained_objects)
 
-            print(f"  {obj.name}の包含ウェイト転送: {time.time() - obj_start:.2f}秒")
-
         # 個別メッシュのウェイト転送
         for obj in p.clothing_meshes:
             if obj in weight_transfer_processed:
                 continue
-
-            obj_start = time.time()
-            print(f"Applying individual weight transfer to {obj.name}")
 
             process_weight_transfer_with_component_normalization(
                 obj,
@@ -105,10 +95,6 @@ class WeightTransferExecutionStage:
             )
 
             weight_transfer_processed.add(obj)
-            print(f"  {obj.name}の個別ウェイト転送: {time.time() - obj_start:.2f}秒")
-
         # 重複頂点のウェイト正規化
         normalize_overlapping_vertices_weights(p.clothing_meshes, p.base_avatar_data)
 
-        weight_transfer_end = time.time()
-        print(f"ウェイト転送処理全体: {weight_transfer_end - weight_transfer_start:.2f}秒")

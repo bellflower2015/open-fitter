@@ -269,14 +269,10 @@ def update_children_parents(
 
     for child_name in children_to_update:
         child_bone = clothing_edit_bones.get(child_name)
-        print(f"child_name: {child_name}, child_bone: {child_bone.name if child_bone else None}")
         if child_bone:
             new_parent_name = parent_bones.get(child_name)
-            print(f"child_name: {child_name}, new_parent_name: {new_parent_name}")
             if new_parent_name and new_parent_name in clothing_edit_bones:
                 child_bone.parent = clothing_edit_bones[new_parent_name]
-                print(f"child_name: {child_name}, new_parent_name: {new_parent_name}")
-
 
 def finish_edit_mode() -> None:
     """Exit edit mode."""

@@ -13,9 +13,6 @@ def apply_distance_falloff_blend(context):
     bpy.context.view_layer.objects.active = context.target_obj
     bpy.ops.object.mode_set(mode="WEIGHT_PAINT")
     context.target_obj.vertex_groups.active_index = context.distance_falloff_group2.index
-    print(f"  distance_falloff_group2: {context.distance_falloff_group2.index}")
-    print(f"  distance_falloff_group2_index: {context.target_obj.vertex_groups[context.distance_falloff_group2.name].index}")
-
     humanoid_to_bone = {bone_map["humanoidBoneName"]: bone_map["boneName"] for bone_map in context.base_avatar_data["humanoidBones"]}
     exclude_bone_groups = []
     exclude_humanoid_bones = ["LeftBreast", "RightBreast"]
@@ -37,14 +34,11 @@ def apply_distance_falloff_blend(context):
         for target_group_name in exclude_bone_groups:
             if target_group_name in context.target_obj.vertex_groups:
                 target_group = context.target_obj.vertex_groups[target_group_name]
-                print(f"    頂点グループ '{target_group_name}' のウェイトを取得中...")
                 for i, vertex in enumerate(context.target_obj.data.vertices):
                     for group in vertex.groups:
                         if group.group == target_group.index:
                             total_target_weights[i] += group.weight
                             break
-            else:
-                print(f"    警告: 頂点グループ '{target_group_name}' が見つかりません")
         masked_weights = np.maximum(new_group_weights, total_target_weights)
         for i in range(len(context.target_obj.data.vertices)):
             context.distance_falloff_group2.add([i], masked_weights[i], "REPLACE")

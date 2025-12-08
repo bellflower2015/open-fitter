@@ -81,7 +81,6 @@ def execute_transitions_with_cache(deferred_transitions, transition_cache, targe
         for transition_set in transition_sets:
             source_label = transition_set.get('source_label', '')
             target_shape_key_name = target_shape_key_label_to_name.get(source_label, '')
-            print(f"source_label: {source_label}, target_shape_key_name: {target_shape_key_name}")
             if transition_set.get('label', '') == target_label and target_shape_key_name in target_obj.data.shape_keys.key_blocks:
                 target_transition_set = transition_set
                 print(f"Found transition set for {target_label} with source label {source_label}")
@@ -93,7 +92,6 @@ def execute_transitions_with_cache(deferred_transitions, transition_cache, targe
             for default_transition_set in default_transition_sets:
                 source_label = default_transition_set.get('source_label', '')
                 target_shape_key_name = target_shape_key_label_to_name.get(source_label, '')
-                print(f"source_label: {source_label}, target_shape_key_name: {target_shape_key_name}")
                 if default_transition_set.get('label', '') == target_label and target_shape_key_name in target_obj.data.shape_keys.key_blocks:
                     target_transition_set = default_transition_set
                     print(f"Found default transition set for {target_label} with source label {source_label}")
@@ -130,8 +128,6 @@ def execute_transitions_with_cache(deferred_transitions, transition_cache, targe
         # 現在のtarget_shape_keyの位置を取得
         initial_vertices = np.array([v.co for v in target_shape_key.data])
 
-        print(f"target_transition_set: {target_transition_set}")
-
         initial_vertices_dict[transition_data['target_shape_key_name']] = initial_vertices.copy()
         
         for transition in target_transition_set.get('transitions', []):
@@ -139,9 +135,6 @@ def execute_transitions_with_cache(deferred_transitions, transition_cache, targe
             if not operations:
                 print(f"No operations found for {target_label}")
                 continue
-            
-            print(f"number of operations: {len(operations)}")
-            print(f"operations: {operations}")
             
             # operationsとtransition_dataをセットで保存（初期BlendShape値も含める）
             transition_operations.append({
@@ -183,8 +176,6 @@ def execute_transitions_with_cache(deferred_transitions, transition_cache, targe
             base_avatar_data = transition_data['base_avatar_data']
             current_blendshape_values = item['current_blendshape_values']
 
-            print(f"target_label: {target_label}")
-            
             # 現在のoperation_indexが存在するかチェック
             if operation_index >= len(operations):
                 continue
@@ -219,7 +210,6 @@ def execute_transitions_with_cache(deferred_transitions, transition_cache, targe
                 if blend_field['label'] == operation_label:
                     mask_bones = blend_field.get("maskBones", [])
                     if mask_bones:
-                        print(f"mask_bones is found for {operation_label} : {mask_bones}")
                         mask_weights = create_blendshape_mask(target_obj, mask_bones, clothing_avatar_data, field_name=operation_label, store_debug_mask=False)
                         break
             # mask_weightsがNoneの場合はmask_weightsを1.0にする
@@ -326,14 +316,12 @@ def execute_transitions_with_cache(deferred_transitions, transition_cache, targe
                     target_obj.shape_key_add(name='Basis', from_mix=False)
                 
                 target_shape_key = target_obj.shape_key_add(name=shape_key_to_use, from_mix=False)
-                print(f"Created new shape key: {shape_key_to_use}")
                 created_shape_key_names.append(shape_key_to_use)
                 shape_key_created = True
             else:
                 print(f"Warning: Basis shape key {shape_key_to_use} not found")
         
         if target_shape_key is None:
-            print(f"Failed to get or create shape key: {shape_key_to_use}")
             continue
         
         used_shape_key_names.add(target_shape_key.name)
@@ -354,6 +342,4 @@ def execute_transitions_with_cache(deferred_transitions, transition_cache, targe
             target_shape_key.data[i].co = mask_weights[i] * (current_vertices[i] - initial_vertices[i]) + target_shape_key.data[i].co
     
     print("Finished executing deferred transitions")
-    print(f"Created shape keys: {created_shape_key_names}")
-
     return transition_operations, created_shape_key_mask_weights, used_shape_key_names

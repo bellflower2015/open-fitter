@@ -58,8 +58,6 @@ def batch_process_vertices_multi_step(vertices, all_field_points, all_delta_posi
         delta_positions = all_delta_positions[step]
         
         print(f"ステップ {step+1}/{num_steps} の変形を適用中...")
-        print(f"使用するフィールド頂点数: {len(field_points)}")
-        
         # KDTreeを使用して近傍点を検索（各ステップで新しいKDTreeを構築）
         kdtree = cKDTree(field_points)
         
@@ -166,8 +164,6 @@ def batch_process_vertices_with_custom_range(vertices, all_field_points, all_del
         if step_start + 0.00001 <= end_value and step_end - 0.00001 >= start_value:
             processed_steps.append((step, step_start, step_end))
     
-    print(f"処理対象ステップ: {len(processed_steps)}")
-    
     # 各ステップの変位を累積的に適用
     for step_idx, (step, step_start, step_end) in enumerate(processed_steps):
         field_points = all_field_points[step].copy()
@@ -176,8 +172,6 @@ def batch_process_vertices_with_custom_range(vertices, all_field_points, all_del
         
         print(f"ステップ {step_idx+1}/{len(processed_steps)} (step {step}) の変形を適用中...")
         print(f"ステップ値範囲: {step_start:.3f} -> {step_end:.3f}")
-        print(f"使用するフィールド頂点数: {len(field_points)}")
-        
         # 任意の値からの変形
         if start_value != step_start:
             if start_value >= step_start + 0.00001:
@@ -282,14 +276,12 @@ def _safe_inverse_matrix(combined_matrix, vertex_index):
     try:
         return combined_matrix.inverted()
     except Exception:
-        print(f"警告: 頂点 {vertex_index} の逆行列を計算できませんでした")
         return Matrix.Identity(4)
 
 
 def _log_progress(vertex_index, total_vertices):
     if (vertex_index + 1) % 1000 == 0:
-        print(f"進捗: {vertex_index + 1}/{total_vertices} 頂点処理完了")
-
+        pass  # Progress logging disabled
 
 def _compute_inverse_vertices(vertices, mesh_obj, armature_obj):
     inverse_transformed_vertices = []
@@ -298,7 +290,6 @@ def _compute_inverse_vertices(vertices, mesh_obj, armature_obj):
         weights = get_vertex_groups_and_weights(mesh_obj, vertex_index)
 
         if not weights:
-            print(f"警告: 頂点 {vertex_index} のウェイトがないため、単位行列を使用します")
             inverse_transformed_vertices.append(pos)
             _log_progress(vertex_index, len(vertices))
             continue
@@ -308,7 +299,6 @@ def _compute_inverse_vertices(vertices, mesh_obj, armature_obj):
         if total_weight > 0:
             combined_matrix = combined_matrix * (1.0 / total_weight)
         else:
-            print(f"警告: 頂点 {vertex_index} のウェイトがないため、単位行列を使用します")
             combined_matrix = Matrix.Identity(4)
 
         inverse_matrix = _safe_inverse_matrix(combined_matrix, vertex_index)
@@ -359,11 +349,7 @@ def inverse_bone_deform_all_vertices(armature_obj, mesh_obj):
 
     vertices = _gather_world_vertices(mesh_obj)
 
-    print(f"ボーン変形の逆変換を開始: {len(vertices)}頂点")
-
     inverse_transformed_vertices = _compute_inverse_vertices(vertices, mesh_obj, armature_obj)
-
-    print(f"ボーン変形の逆変換が完了しました")
 
     _apply_inverse_to_shape_keys(mesh_obj, inverse_transformed_vertices, vertices)
     _apply_inverse_to_mesh(mesh_obj, inverse_transformed_vertices)
@@ -623,12 +609,8 @@ def get_deformation_field_multi_step(field_data_path: str) -> dict:
         all_field_points = data['all_field_points']
         all_delta_positions = data['all_delta_positions']
         num_steps = int(data.get('num_steps', len(all_delta_positions)))
-        print(f"複数ステップのデータ（新形式）を検出: {num_steps}ステップ")
-        
         # ミラー設定を確認（データに含まれていない場合はそのまま使用）
         enable_x_mirror = data.get('enable_x_mirror', False)
-        print(f"X軸ミラー設定: {'有効' if enable_x_mirror else '無効'}")
-        
         if enable_x_mirror:
             # X軸ミラーリング：X座標が0より大きいデータを負に反転してミラーデータを追加
             mirrored_field_points = []
@@ -657,26 +639,19 @@ def get_deformation_field_multi_step(field_data_path: str) -> dict:
                         mirrored_field_points.append(combined_field_points)
                         mirrored_delta_positions.append(combined_delta_positions)
                         
-                        print(f"ステップ {step+1}: 元の頂点数 {len(field_points)} → ミラー適用後 {len(combined_field_points)}")
                     else:
                         mirrored_field_points.append(field_points)
                         mirrored_delta_positions.append(delta_positions)
-                        print(f"ステップ {step+1}: フィールド頂点数 {len(field_points)} (ミラー対象なし)")
                 else:
                     mirrored_field_points.append(field_points)
                     mirrored_delta_positions.append(delta_positions)
-                    print(f"ステップ {step+1}: フィールド頂点数 0")
-            
             # ミラー適用後のデータを使用
             all_field_points = mirrored_field_points
             all_delta_positions = mirrored_delta_positions
         else:
             # ミラーが無効の場合、元のデータをそのまま使用
-            print("X軸ミラーリングが無効のため、元のデータをそのまま使用します")
-            print("field_data_path: ", field_data_path)
             for step in range(num_steps):
-                print(f"ステップ {step+1}: フィールド頂点数 {len(all_field_points[step])}")
-        
+                pass  # 元のデータを維持
     elif 'field_points' in data and 'all_delta_positions' in data:
         # 旧形式：単一の座標セットが保存されている場合
         field_points = data['field_points']
@@ -685,7 +660,6 @@ def get_deformation_field_multi_step(field_data_path: str) -> dict:
         
         # 旧形式の場合、すべてのステップで同じ座標を使用
         all_field_points = [field_points for _ in range(num_steps)]
-        print(f"複数ステップのデータ（旧形式）を検出: {num_steps}ステップ")
     else:
         # 後方互換性のため、単一ステップのデータも処理
         field_points = data.get('field_points', data.get('delta_positions', []))
@@ -693,8 +667,6 @@ def get_deformation_field_multi_step(field_data_path: str) -> dict:
         all_field_points = [field_points]
         all_delta_positions = [delta_positions]
         num_steps = 1
-        print("単一ステップのデータを検出")
-    
     # weightsが存在しない場合はすべて1のものを使用
     if 'weights' in data:
         field_weights = data['weights']

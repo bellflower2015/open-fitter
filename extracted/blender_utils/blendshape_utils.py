@@ -101,7 +101,6 @@ def calculate_blendshape_settings_difference(settings1: list, settings2: list,
                 total_difference += value_diff * total_max_displacement
                 
             except Exception as e:
-                print(f"Warning: Could not load deformation data for {blend_shape_name}: {e}")
                 # データを読み込めない場合は値の差をそのまま使用
                 total_difference += value_diff
     
@@ -206,8 +205,6 @@ def create_blendshape_mask(target_obj, mask_bones, clothing_avatar_data, field_n
             if weight > 0:
                 debug_group.add([vert_idx], weight, 'REPLACE')
         
-        print(f"Created debug mask group '{group_name}' using bones: {sorted(processed_bones)}")
-    
     return mask_weights
 
 # Merged from process_single_blendshape_transition_set.py
@@ -517,15 +514,12 @@ class TransitionCache:
         
         # 同じキーが既に存在する場合は上書きしない
         if cache_key in self.cache:
-            print(f"Cache key already exists, keeping existing entry: {cache_key}")
             return
         
         self.cache[cache_key] = {
             'vertices': vertices.copy(),
             'blendshape_values': all_blendshape_values.copy()
         }
-        print(f"Stored new cache entry: {cache_key}")
-    
     def find_interpolation_candidates(self, target_blendshape_values, changing_blendshape, blendshape_groups=None):
         """線形補間候補を検索"""
         candidates = []
@@ -542,13 +536,9 @@ class TransitionCache:
                     group_blendshapes = set(blendshapes_in_group)
                     break
         
-        print(f"target_blendshape_values: {target_blendshape_values}")
-        
         for cache_key, cached_data in self.cache.items():
             cached_values = cached_data['blendshape_values']
 
-            print(f"cached_values: {cached_values}")
-            
             values_match = True
             
             # BlendShapeGroupに属する場合：同じグループの他のBlendShapeの値が同じかチェック
@@ -561,8 +551,6 @@ class TransitionCache:
             if values_match:
                 cached_changing_value = cached_values.get(changing_blendshape, 0.0)
                 target_changing_value = target_blendshape_values.get(changing_blendshape, 0.0)
-                
-                print(f"cached_changing_value: {cached_changing_value}, target_changing_value: {target_changing_value}")
                 
                 candidates.append({
                     'cached_value': cached_changing_value,

@@ -48,20 +48,14 @@ class _FindVerticesNearFacesContext:
             return
 
         self.selection_state = _capture_selection_state()
-        print(f"ベースメッシュ '{self.base_mesh.name}' の頂点グループ '{self.vertex_group_name}' に属する面を分析中...")
-
-        print("ベースメッシュを複製して三角面化中...")
         self._prepare_base_mesh_copy()
 
         try:
             temp_base_vertex_group = _find_vertex_group(self.temp_base_mesh, self.vertex_group_name)
             if not temp_base_vertex_group:
-                print(f"エラー: 複製メッシュに頂点グループ '{self.vertex_group_name}' が見つかりません")
                 return
 
             base_vertices_in_group = _collect_vertices_in_group(self.base_mesh_data, temp_base_vertex_group.index)
-            print(f"頂点グループに属する頂点数: {len(base_vertices_in_group)}")
-
             target_face_indices = _select_target_faces(self.base_mesh_data, base_vertices_in_group, self.use_all_faces)
             print(f"条件を満たす面数: {len(target_face_indices)} (すべて三角形)")
 
@@ -98,15 +92,12 @@ class _FindVerticesNearFacesContext:
 
     def _validate_inputs(self):
         if not self.base_mesh or self.base_mesh.type != 'MESH':
-            print("エラー: ベースメッシュが指定されていないか、メッシュではありません")
             return False
 
         if not self.target_mesh or self.target_mesh.type != 'MESH':
-            print("エラー: ターゲットメッシュが指定されていないか、メッシュではありません")
             return False
 
         if not _find_vertex_group(self.base_mesh, self.vertex_group_name):
-            print(f"エラー: ベースメッシュに頂点グループ '{self.vertex_group_name}' が見つかりません")
             return False
 
         return True
@@ -130,14 +121,8 @@ class _FindVerticesNearFacesContext:
             bpy.ops.object.vertex_group_smooth(factor=0.5, repeat=self.smooth_repeat, expand=0.5)
         bpy.ops.object.mode_set(mode='OBJECT')
 
-        print(f"作成された頂点グループ: {self.vertex_group_name}")
-        print(f"条件を満たした頂点数: {len(found_vertices)}")
-        print(f"最大距離: {self.max_distance}")
-
     def _remove_temp_base_mesh(self, log=False):
         if self.temp_base_mesh and not self.temp_base_mesh_removed:
-            if log:
-                print(f"一時メッシュ '{self.temp_base_mesh.name}' を削除中...")
             bpy.data.objects.remove(self.temp_base_mesh, do_unlink=True)
             self.temp_base_mesh_removed = True
 
@@ -345,8 +330,6 @@ def _build_and_interpolate(
     )
 
     temp_bm.free()
-    end_time = time.time()
-    print(f"BVHTree検索完了: {end_time - start_time:.3f}秒")
     return vertex_interpolated_weights, found_vertices
 
 

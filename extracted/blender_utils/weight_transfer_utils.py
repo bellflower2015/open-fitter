@@ -35,7 +35,6 @@ def setup_weight_transfer() -> None:
 
 def _validate_mesh(obj, label):
     if not obj or obj.type != 'MESH':
-        print(f"エラー: {label}が指定されていないか、メッシュではありません")
         return False
     return True
 
@@ -66,15 +65,11 @@ def _ensure_target_vertex_group(target_obj, vertex_group_name):
 
 
 def _build_bvh_tree(body_bm):
-    bvh_time_start = time.time()
     bvh_tree = BVHTree.FromBMesh(body_bm)
-    bvh_time = time.time() - bvh_time_start
-    print(f"  BVHツリー作成: {bvh_time:.2f}秒")
     return bvh_tree
 
 
 def _compute_adjusted_normals(cloth_bm, bvh_tree, body_bm, body_normal_matrix, cloth_normal_matrix):
-    adjusted_normals_time_start = time.time()
     adjusted_normals = {}
 
     for i, vertex in enumerate(cloth_bm.verts):
@@ -91,13 +86,10 @@ def _compute_adjusted_normals(cloth_bm, bvh_tree, body_bm, body_normal_matrix, c
         else:
             adjusted_normals[i] = original_normal_world
 
-    adjusted_normals_time = time.time() - adjusted_normals_time_start
-    print(f"  法線調整: {adjusted_normals_time:.2f}秒")
     return adjusted_normals
 
 
 def _build_face_cache(cloth_bm, adjusted_normals):
-    face_cache_time_start = time.time()
     face_centers = []
     face_areas = {}
     face_adjusted_normals = {}
@@ -118,16 +110,11 @@ def _build_face_cache(cloth_bm, adjusted_normals):
             face_normal += adjusted_normals[v.index]
         face_adjusted_normals[face.index] = face_normal.normalized()
 
-    face_cache_time = time.time() - face_cache_time_start
-    print(f"  面キャッシュ作成: {face_cache_time:.2f}秒")
     return face_centers, face_areas, face_adjusted_normals, face_indices
 
 
 def _build_kdtree(face_centers):
-    kdtree_time_start = time.time()
     kd = cKDTree(face_centers)
-    kdtree_time = time.time() - kdtree_time_start
-    print(f"  KDTree構築: {kdtree_time:.2f}秒")
     return kd
 
 
@@ -135,7 +122,6 @@ def _update_normals_with_weighted_average(cloth_bm, kd, face_centers, face_areas
     if normal_radius <= 0:
         return adjusted_normals
 
-    normal_avg_time_start = time.time()
     for i, vertex in enumerate(cloth_bm.verts):
         co = vertex.co
         weighted_normal = Vector((0, 0, 0))
@@ -156,8 +142,6 @@ def _update_normals_with_weighted_average(cloth_bm, kd, face_centers, face_areas
             weighted_normal.normalize()
             adjusted_normals[i] = weighted_normal
 
-    normal_avg_time = time.time() - normal_avg_time_start
-    print(f"  法線加重平均計算: {normal_avg_time:.2f}秒")
     return adjusted_normals
 
 
@@ -281,10 +265,7 @@ def transfer_weights_from_nearest_vertex(base_mesh, target_obj, vertex_group_nam
 
     base_vertex_group = _find_vertex_group(base_mesh, vertex_group_name)
     if not base_vertex_group:
-        print(f"エラー: ベースメッシュに頂点グループ '{vertex_group_name}' が見つかりません")
         return
-    
-    print(f"ベースメッシュ '{base_mesh.name}' からターゲットメッシュ '{target_obj.name}' へ頂点グループ '{vertex_group_name}' のウェイトを転写中...")
     
     # モードを確認してオブジェクトモードに切り替え
     original_mode = _ensure_object_mode()
@@ -314,7 +295,6 @@ def transfer_weights_from_nearest_vertex(base_mesh, target_obj, vertex_group_nam
 
     adjusted_normals = _update_normals_with_weighted_average(cloth_bm, kd, face_centers, face_areas, face_adjusted_normals, face_indices, adjusted_normals, normal_radius)
     
-    weight_calc_time_start = time.time()
     base_mesh_data = base_mesh.data
 
     for i, vertex in enumerate(cloth_bm.verts):
@@ -333,9 +313,6 @@ def transfer_weights_from_nearest_vertex(base_mesh, target_obj, vertex_group_nam
         )
         target_vertex_group.add([i], weight, 'REPLACE')
 
-    weight_calc_time = time.time() - weight_calc_time_start
-    print(f"  ウェイト計算: {weight_calc_time:.2f}秒")
-    
     _restore_mode(original_mode)
 
 # Merged from create_overlapping_vertices_attributes.py
@@ -476,5 +453,3 @@ def create_overlapping_vertices_attributes(clothing_meshes, base_avatar_data, di
         mesh_obj.data.update()
         
         print(f"Created custom attributes '{overlap_attr_name}' and '{world_pos_attr_name}' for {mesh_obj.name} with {cluster_id} overlapping vertex clusters")
-        print(f"Distance threshold: {distance_threshold}")
-        print(f"Weight similarity threshold: {weight_similarity_threshold}")

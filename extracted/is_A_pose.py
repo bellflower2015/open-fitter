@@ -81,12 +81,6 @@ def is_A_pose(avatar_data: dict, armature: bpy.types.Object, init_pose_filepath=
             arm_bone_direction = (temp_armature.matrix_world @ lower_arm_bone.head) - (temp_armature.matrix_world @ arm_bone.head)
             arm_bone_direction = arm_bone_direction.normalized()
             arm_bone_angle = math.acos(abs(arm_bone_direction.dot(Vector((1, 0, 0)))))
-            print(f"arm_bone: {arm_bone.name}")
-            print(f"lower_arm_bone: {lower_arm_bone.name}")
-            print(f"arm_bone_head: {temp_armature.matrix_world @ arm_bone.head}")
-            print(f"lower_arm_bone_head: {temp_armature.matrix_world @ lower_arm_bone.head}")
-            print(f"arm_bone_direction: {arm_bone_direction}")
-            print(f"arm_bone_angle: {math.degrees(arm_bone_angle)}")
             if math.degrees(arm_bone_angle) > 30:
                 result = True
             else:

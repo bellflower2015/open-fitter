@@ -11,7 +11,6 @@ from apply_distance_normal_based_smoothing import apply_distance_normal_based_sm
 
 
 def run_distance_normal_smoothing(context):
-    smoothing_time_start = time.time()
     target_vertex_groups = []
     smoothing_mask_groups = []
     target_humanoid_bones = [
@@ -143,7 +142,6 @@ def run_distance_normal_smoothing(context):
                     break
 
     if body_obj and target_vertex_groups and has_breast_weights:
-        print(f"  距離・法線ベースのスムージングを実行: {len(target_vertex_groups)}個のターゲットグループ (LeftBreast/RightBreastウェイト検出)")
         apply_distance_normal_based_smoothing(
             body_obj=body_obj,
             cloth_obj=context.target_obj,
@@ -161,5 +159,3 @@ def run_distance_normal_smoothing(context):
     else:
         print("  Body.BaseAvatarオブジェクトが見つからないか、ターゲットグループが空です")
 
-    smoothing_time = time.time() - smoothing_time_start
-    print(f"  距離・法線ベースのスムージング: {smoothing_time:.2f}秒")

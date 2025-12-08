@@ -124,10 +124,6 @@ def process_blendshape_transitions(current_config: dict, next_config: dict) -> N
         current_config['config_data']['blend_shape_transition_sets'] = all_transition_sets
         current_config['config_data']['blend_shape_default_transition_sets'] = all_default_transition_sets
         
-        print(f"  Total transition sets: {len(all_transition_sets)}")
-        print(f"  Total default transition sets: {len(all_default_transition_sets)}")
-        
     except Exception as e:
-        print(f"Error processing BlendShape transitions: {e}")
         import traceback
         traceback.print_exc()

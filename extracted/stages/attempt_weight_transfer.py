@@ -88,7 +88,6 @@ def attempt_weight_transfer(context, source_obj, vertex_group, max_distance_try=
             print(f"Weight transfered with max_distance {max_distance_try}")
             return True, max_distance_try
         except RuntimeError as exc:
-            print(f"Weight transfer failed with max_distance {max_distance_try}: {str(exc)}")
             restore_weights(context.target_obj, prev_weights)
             max_distance_try += 0.05
             if max_distance_try > 1.0:

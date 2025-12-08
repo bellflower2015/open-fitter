@@ -122,9 +122,6 @@ def duplicate_mesh_with_partial_weights(base_mesh: bpy.types.Object, base_avatar
     set_armature_modifier_visibility(left_mesh, False, False)
     set_armature_modifier_visibility(right_mesh, False, False)
 
-    print(f"left_bones: {left_bones}")
-    print(f"right_bones: {right_bones}")
-   
     # 通常版の処理
     # 左右の頂点グループを削除
     for bone_name in left_bones:

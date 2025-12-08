@@ -79,8 +79,6 @@ def build_bone_mappings(
             if humanoid_name not in mappings.missing_humanoid_bones
         }
 
-    print(f"bones_to_replace: {mappings.bones_to_replace}")
-
     return mappings
 
 

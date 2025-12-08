@@ -481,8 +481,6 @@ def propagate_bone_weights(mesh_obj: bpy.types.Object, temp_group_name: str = "P
             
             # 残りの頂点に平均ウェイトを適用
             num_averaged = len(vertices_without_weights)
-            print(f"Applying average weights to remaining {num_averaged} vertices in {mesh_obj.name}")
-            
             for vert_idx in vertices_without_weights:
                 vertex_weights[vert_idx] = average_weights.copy()
                 temp_group.add([vert_idx], 1.0, 'REPLACE')  # 伝播頂点を記録

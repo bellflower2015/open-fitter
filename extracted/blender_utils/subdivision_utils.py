@@ -28,7 +28,6 @@ def subdivide_faces(obj, face_indices, cuts=1, max_distance=0.005):
         return
 
     if len(obj.data.vertices) == 0:
-        print("メッシュに頂点がありません")
         return
 
     # --- 細分化前にCustom Split Normalsを保存（cKDTree版） ---
@@ -140,9 +139,8 @@ def subdivide_faces(obj, face_indices, cuts=1, max_distance=0.005):
         bm.to_mesh(mesh)
         mesh.update()
         bm.free()
-    except Exception as e:
-        print(f"細分化中にエラーが発生しました: {e}")
-
+    except Exception:
+        pass  # 細分化失敗を無視
     # --- 細分化後、Custom Split Normalsを再設定（cKDTree使用） ---
     if had_custom_normals and kd is not None:
         new_loop_normals = [None] * len(mesh.loops)
@@ -209,7 +207,6 @@ def subdivide_long_edges(obj, min_edge_length=0.005, max_edge_length_ratio=2.0, 
         return
 
     if len(obj.data.vertices) == 0:
-        print("メッシュに頂点がありません")
         return
 
     # --- 細分化前にCustom Split Normalsを保存（cKDTree版） ---
@@ -261,7 +258,6 @@ def subdivide_long_edges(obj, min_edge_length=0.005, max_edge_length_ratio=2.0, 
             
         threshold_length = median_edge_length * max_edge_length_ratio
         
-        print(f"中央値エッジ長: {median_edge_length:.6f}")
         print(f"細分化閾値: {threshold_length:.6f} (中央値の{max_edge_length_ratio}倍)")
         
         # 閾値以上の長さのエッジを特定
@@ -288,7 +284,6 @@ def subdivide_long_edges(obj, min_edge_length=0.005, max_edge_length_ratio=2.0, 
         mesh.update()
         bm.free()
     except Exception as e:
-        print(f"細分化中にエラーが発生しました: {e}")
         if 'bm' in locals():
             bm.free()
 
@@ -371,9 +366,7 @@ def subdivide_selected_vertices(obj_name, vertex_indices, level=2):
     if connected_edges:
         for _ in range(level):
             bpy.ops.mesh.subdivide(number_cuts=1)
-        print(f"{len(connected_edges)} 個のエッジが細分化されました")
-    else:
-        print("選択された頂点間にエッジが見つかりませんでした")
+    # else: 細分化対象エッジなし
     
     # オブジェクトモードに戻る
     bpy.ops.object.mode_set(mode='OBJECT')

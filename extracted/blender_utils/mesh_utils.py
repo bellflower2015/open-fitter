@@ -37,8 +37,6 @@ def clear_mesh_cache():
             cache_data['bmesh'].free()
     
     _mesh_cache.clear()
-    print("メッシュキャッシュをクリアしました")
-
 # Merged from triangulate_mesh.py
 
 def triangulate_mesh(obj: bpy.types.Object) -> None:
@@ -72,10 +70,7 @@ def triangulate_mesh(obj: bpy.types.Object) -> None:
         # オブジェクトモードに戻る
         bpy.ops.object.mode_set(mode='OBJECT')
         
-        print(f"Triangulated mesh: {obj.name}")
-        
     except Exception as e:
-        print(f"Error triangulating mesh {obj.name}: {e}")
         # エラーが発生した場合もオブジェクトモードに戻る
         try:
             bpy.ops.object.mode_set(mode='OBJECT')
@@ -200,9 +195,8 @@ def apply_modifiers(obj):
     for modifier in obj.modifiers[:]:  # スライスを使用してリストのコピーを作成
         try:
             bpy.ops.object.modifier_apply(modifier=modifier.name)
-        except Exception as e:
-            print(f"Failed to apply modifier {modifier.name}: {e}")
-
+        except Exception:
+            pass  # モディファイア適用失敗を無視
 
 def apply_all_shapekeys(obj):
     """オブジェクトの全シェイプキーを適用する"""
@@ -230,8 +224,8 @@ def apply_modifiers_keep_shapekeys_with_temp(obj):
         for modifier in obj.modifiers:
             try:
                 bpy.ops.object.modifier_apply(modifier=modifier.name)
-            except Exception as e:
-                print(f"Failed to apply modifier {modifier.name}: {e}")
+            except Exception:
+                pass  # モディファイア適用失敗を無視
         return
 
     # グローバルカウンタの初期化（存在しない場合）

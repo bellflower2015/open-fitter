@@ -13,16 +13,13 @@ from blender_utils.weight_processing_utils import merge_weights_to_parent
 
 
 def merge_added_groups(context):
-    group_merge_time_start = time.time()
     max_iterations = 5
     iteration = 0
     added_groups = set(context.added_groups)
     while added_groups and iteration < max_iterations:
         changed = False
         remaining_groups = set()
-        print(f"  反復処理: {iteration}")
         for group_name in added_groups:
-            print(f"  グループ名: {group_name}")
             if group_name not in context.target_obj.vertex_groups:
                 print(f"  {group_name} は削除されています。スキップします")
                 continue
@@ -32,7 +29,6 @@ def merge_added_groups(context):
                 weight = get_vertex_weight_safe(context.target_obj, group, v.index)
                 if weight > 0:
                     verts_with_weight.append(v)
-            print(f"  ウェイトを持つ頂点数: {len(verts_with_weight)}")
             if len(verts_with_weight) == 0:
                 print(f"  {group_name} は空: スキップします")
                 continue
@@ -55,7 +51,6 @@ def merge_added_groups(context):
                     g_name = context.target_obj.vertex_groups[g.group].name
                     if g_name in context.bone_groups and g_name in context.original_groups and g.weight > 0:
                         existing_groups.add(g_name)
-            print(f"  既存グループ: {existing_groups}")
             if len(existing_groups) == 1:
                 merge_weights_to_parent(context.target_obj, group_name, list(existing_groups)[0])
                 changed = True
@@ -82,8 +77,6 @@ def merge_added_groups(context):
                                 break
                             queue.append(context.target_obj.data.vertices[other_vert.index])
                 bm.free()
-                print(f"  隣接探索後の既存グループ: {existing_groups}")
-
             if len(existing_groups) != 1:
                 remaining_groups.add(group_name)
 
@@ -91,10 +84,6 @@ def merge_added_groups(context):
             break
         added_groups = remaining_groups
         iteration += 1
-    group_merge_time = time.time() - group_merge_time_start
-    print(f"  グループ統合処理: {group_merge_time:.2f}秒")
-
-    aux_bone_time_start = time.time()
     for group_name in list(added_groups):
         for aux_set in context.base_avatar_data.get("auxiliaryBones", []):
             if group_name in aux_set["auxiliaryBones"]:
@@ -121,5 +110,3 @@ def merge_added_groups(context):
     for group_name in added_groups:
         if group_name in context.target_obj.vertex_groups:
             context.target_obj.vertex_groups.remove(context.target_obj.vertex_groups[group_name])
-    aux_bone_time = time.time() - aux_bone_time_start
-    print(f"  補助ボーン処理: {aux_bone_time:.2f}秒")

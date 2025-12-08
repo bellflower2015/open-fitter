@@ -52,14 +52,9 @@ class AssetLoadingStage:
 
         # ベースBlendファイル読み込み
         print("Status: ベースファイル読み込み中")
-        print(f"Progress: {(p.pair_index + 0.05) / p.total_pairs * 0.9:.3f}")
         load_base_file(p.args.base)
-        base_load_time = time.time()
-        print(f"ベースファイル読み込み: {base_load_time - p.start_time:.2f}秒")
-
         # ベースアバター処理（最終pairのみFBXをロード、中間pairはavatar_dataのみ）
         print("Status: ベースアバター処理中")
-        print(f"Progress: {(p.pair_index + 0.1) / p.total_pairs * 0.9:.3f}")
         if is_final_pair:
             (
                 p.base_mesh,
@@ -79,7 +74,6 @@ class AssetLoadingStage:
 
         # 衣装アバター処理
         print("Status: 衣装データ処理中")
-        print(f"Progress: {(p.pair_index + 0.15) / p.total_pairs * 0.9:.3f}")
         (
             p.clothing_meshes,
             p.clothing_armature,
@@ -101,23 +95,12 @@ class AssetLoadingStage:
         # 長いシェイプキー名を短縮
         truncate_long_shape_key_names(p.clothing_meshes, p.clothing_avatar_data)
 
-        clothing_process_time = time.time()
-        print(f"衣装データ処理: {clothing_process_time - base_load_time:.2f}秒")
-
         # メタデータ読み込み
         print("Status: クロスメタデータ読み込み中")
-        print(f"Progress: {(p.pair_index + 0.2) / p.total_pairs * 0.9:.3f}")
         (
             p.cloth_metadata,
             p.vertex_index_mapping,
         ) = load_cloth_metadata(p.args.cloth_metadata)
-        metadata_load_time = time.time()
-        print(f"クロスメタデータ読み込み: {metadata_load_time - clothing_process_time:.2f}秒")
-
         # マテリアルデータ読み込み（最初のペアのみ）
         if p.pair_index == 0:
-            print("Status: メッシュマテリアルデータ読み込み中")
-            print(f"Progress: {(p.pair_index + 0.22) / p.total_pairs * 0.9:.3f}")
             load_mesh_material_data(p.args.mesh_material_data)
-            material_load_time = time.time()
-            print(f"メッシュマテリアルデータ読み込み: {material_load_time - metadata_load_time:.2f}秒")

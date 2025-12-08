@@ -123,15 +123,12 @@ class OutfitRetargetPipeline:
             ExportPreparationStage(self).run()
 
             total_time = time.time() - self.start_time
-            print(f"Progress: {(self.pair_index + 1.0) / self.total_pairs * 0.9:.3f}")
-            print(f"処理完了: 合計 {total_time:.2f}秒")
             return True
 
         except Exception as e:
             import traceback
 
             print("============= Error Details =============")
-            print(f"Error message: {str(e)}")
             print("\n============= Full Stack Trace =============")
             print(traceback.format_exc())
             print("==========================================")

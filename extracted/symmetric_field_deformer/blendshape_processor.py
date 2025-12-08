@@ -43,7 +43,6 @@ def process_config_blendshapes(ctx):
             os.path.dirname(ctx.field_data_path), blend_field["path"]
         )
 
-        print(f"selected field_path: {field_path}")
         source_blend_shape_settings = blend_field.get("sourceBlendShapeSettings", [])
 
         if (
@@ -160,9 +159,6 @@ def process_config_blendshapes(ctx):
 
             ctx.config_blend_shape_labels.add(label)
             ctx.label_to_target_shape_key_name[label] = generated_shape_key.name
-        else:
-            print(f"Warning: Config blend shape field file not found: {field_path}")
-
         restore_shape_key_state(ctx.target_obj, original_shape_key_state)
 
 
@@ -193,10 +189,7 @@ def process_skipped_transitions(ctx):
             )
             continue
 
-        print(f"Processing skipped config blendShapeField: {label}")
-
         mask_bones = transition_set.get("mask_bones", [])
-        print(f"mask_bones: {mask_bones}")
         mask_weights = None
         if mask_bones:
             mask_weights = create_blendshape_mask(
@@ -233,8 +226,6 @@ def process_skipped_transitions(ctx):
 
         for i in range(len(skipped_blend_shape_key.data)):
             skipped_blend_shape_key.data[i].co = target_shape_key.data[i].co.copy()
-
-        print(f"skipped_blend_shape_key: {skipped_blend_shape_key.name}")
 
         if ctx.config_data and skipped_blend_shape_key:
             ctx.deferred_transitions.append(
@@ -292,8 +283,6 @@ def process_clothing_blendshapes(ctx):
         ):
             continue
 
-        print(f"Processing additional shape key: {key_block.name}")
-
         original_shape_key_state = save_shape_key_state(ctx.target_obj)
 
         for sk in ctx.target_obj.data.shape_keys.key_blocks:
@@ -336,8 +325,6 @@ def process_clothing_blendshapes(ctx):
                         print(
                             f"temp_shape_key_name: {temp_shape_key_name} is found in shape keys"
                         )
-
-        print(f"basis_field_path2: {basis_field_path2}")
 
         key_block.value = 1.0
 
@@ -405,7 +392,6 @@ def process_base_avatar_blendshapes(ctx):
         )
 
         if os.path.exists(field_path):
-            print(f"Applying blend shape field for {label}")
             field_info_blend = get_deformation_field_multi_step(field_path)
             blend_points = field_info_blend["all_field_points"]
             blend_deltas = field_info_blend["all_delta_positions"]
@@ -444,7 +430,6 @@ def process_base_avatar_blendshapes(ctx):
                     ctx.target_obj.matrix_world @ Vector(deformed_vertices[i])
                 )
                 if np.any(np.abs(displacement) > 1e-5):
-                    print(f"blendShapeFields {label} world_displacement: {displacement}")
                     has_displacement = True
                     break
 

@@ -30,8 +30,6 @@ def process_basis_loop(ctx):
     while iteration <= MAX_ITERATIONS:
         original_shape_key_state = save_shape_key_state(ctx.target_obj)
 
-        print(f"selected field_data_path: {basis_field_path}")
-
         if ctx.shape_key:
             ctx.target_obj.shape_key_remove(ctx.shape_key)
         ctx.shape_key = process_field_deformation(
@@ -59,8 +57,6 @@ def process_basis_loop(ctx):
             )
 
         intersections = find_intersecting_faces_bvh(ctx.target_obj)
-        print(f"Iteration {iteration + 1}: Intersecting faces: {len(intersections)}")
-
         if not ctx.subdivision:
             print("Subdivision skipped")
             break

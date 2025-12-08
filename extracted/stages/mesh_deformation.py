@@ -65,25 +65,16 @@ class MeshDeformationStage:
         p = self.pipeline
         time = p.time_module
 
-        print("Status: メッシュ変形処理中")
-        print(f"Progress: {(p.pair_index + 0.45) / p.total_pairs * 0.9:.3f}")
-
         p.propagated_groups_map = {}
-        cycle1_start = time.time()
-
         for obj in p.clothing_meshes:
             self._process_single_mesh(obj, p, time)
 
-        cycle1_end = time.time()
-        p.cycle1_end_time = cycle1_end
-        print(f"サイクル1全体: {cycle1_end - cycle1_start:.2f}秒")
-
+        p.cycle1_end_time = time.time()
         # シェイプキーのデバッグ出力
         self._print_shape_key_summary(p)
 
     def _process_single_mesh(self, obj, p, time):
         """単一メッシュの変形処理"""
-        obj_start = time.time()
         print("cycle1 " + obj.name)
 
         # ウェイト初期化
@@ -144,11 +135,8 @@ class MeshDeformationStage:
         # 生成されたシェイプキーのマージ
         self._merge_generated_shape_keys(obj)
 
-        print(f"  {obj.name}の処理: {time.time() - obj_start:.2f}秒")
-
     def _cleanup_small_weights(self, obj, time):
         """微小ウェイト（0.0005未満）を除外"""
-        cleanup_weights_time_start = time.time()
         for vert in obj.data.vertices:
             groups_to_remove = []
             for g in vert.groups:
@@ -159,9 +147,6 @@ class MeshDeformationStage:
                     obj.vertex_groups[group_idx].remove([vert.index])
                 except RuntimeError:
                     continue
-        cleanup_weights_time = time.time() - cleanup_weights_time_start
-        print(f"  微小ウェイト除外: {cleanup_weights_time:.2f}秒")
-
     def _merge_generated_shape_keys(self, obj):
         """_generated サフィックスのシェイプキーを元のキーにマージ"""
         if not obj.data.shape_keys:

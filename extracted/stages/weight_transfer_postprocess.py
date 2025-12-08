@@ -46,12 +46,7 @@ class WeightTransferPostProcessStage:
         time = p.time_module
 
         print("Status: サイクル2後処理中")
-        print(f"Progress: {(p.pair_index + 0.65) / p.total_pairs * 0.9:.3f}")
-
-        cycle2_post_start = time.time()
-
         for obj in p.clothing_meshes:
-            obj_start = time.time()
             print("cycle2 (post-weight transfer) " + obj.name)
 
             # アーマチュアモディファイアの可視性を復元
@@ -60,8 +55,4 @@ class WeightTransferPostProcessStage:
             # アーマチュアターゲットを衣装アーマチュアに戻す
             set_armature_modifier_target_armature(obj, p.clothing_armature)
 
-            print(f"  {obj.name}の後処理: {time.time() - obj_start:.2f}秒")
-
-        cycle2_post_end = time.time()
-        p.cycle2_post_end = cycle2_post_end
-        print(f"サイクル2後処理全体: {cycle2_post_end - cycle2_post_start:.2f}秒")
+        p.cycle2_post_end = time.time()

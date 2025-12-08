@@ -197,8 +197,6 @@ def find_best_matching_target_settings(source_label: str,
         else:
             difference = difference + 0.00001
         
-        print(f"label: {label} difference: {difference}")
-        
         if difference < min_difference:
             min_difference = difference
             best_label = label
@@ -279,8 +277,6 @@ def find_material_index_from_faces(mesh_obj, faces_data):
                     # マッチした面のマテリアルインデックスを記録
                     material_index = polygon.material_index
                     matched_material_indices.append(material_index)
-                    print(f"Found matching triangular face with material index: {material_index}")
-                    
             elif len(polygon.vertices) >= 4:  # 多角形面処理
                 num_vertices = len(polygon.vertices)
                 # 面の頂点のワールド座標を取得
@@ -309,7 +305,6 @@ def find_material_index_from_faces(mesh_obj, faces_data):
                         # マッチした組み合わせが見つかった
                         material_index = polygon.material_index
                         matched_material_indices.append(material_index)
-                        print(f"Found matching face (num_vertices: {num_vertices}) with material index: {material_index}")
                         break  # 同じ面の複数の組み合わせを重複カウントしないように
     
     # マッチした面が見つからない場合
@@ -322,7 +317,6 @@ def find_material_index_from_faces(mesh_obj, faces_data):
     most_common_index = most_common_material[0]
     most_common_count = most_common_material[1]
     
-    print(f"Material index frequencies: {dict(material_counter)}")
     print(f"Most common material index: {most_common_index} (appears {most_common_count} times)")
     
     return most_common_index

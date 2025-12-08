@@ -34,10 +34,6 @@ def process_weight_transfer_with_component_normalization(target_obj, armature, b
         cloth_metadata: クロスメタデータ
     """
     import time
-    start_total = time.time()
-
-    print(f"process_weight_transfer_with_component_normalization 処理開始: {target_obj.name}")
-
     ctx = WeightTransferContext(
         target_obj=target_obj,
         armature=armature,
@@ -57,7 +53,6 @@ def process_weight_transfer_with_component_normalization(target_obj, armature, b
     ctx.left_base_obj = bpy.data.objects["Body.BaseAvatar.LeftOnly"]
     ctx.right_base_obj = bpy.data.objects["Body.BaseAvatar.RightOnly"]
 
-    print(f"Set blend_shape_settings: {blend_shape_settings}")
     _apply_blend_shape_settings(ctx)
 
     depsgraph = bpy.context.evaluated_depsgraph_get()
@@ -65,19 +60,13 @@ def process_weight_transfer_with_component_normalization(target_obj, armature, b
     eval_mesh = eval_target_obj.data
 
     existing_target_groups = _get_existing_target_groups(ctx)
-    print(f"準備時間: {time.time() - start_time:.2f}秒")
-
     start_time = time.time()
     component_patterns = group_components_by_weight_pattern(target_obj, base_avatar_data, clothing_armature)
     ctx.component_patterns = component_patterns
-    print(f"コンポーネントパターン抽出時間: {time.time() - start_time:.2f}秒")
-
     original_vertex_weights = _store_original_vertex_weights(ctx)
 
     start_time = time.time()
     process_weight_transfer(target_obj, armature, base_avatar_data, clothing_avatar_data, field_path, clothing_armature, cloth_metadata)
-    print(f"通常ウェイト転送処理時間: {time.time() - start_time:.2f}秒")
-
     component_patterns = _normalize_component_patterns(ctx, component_patterns)
 
     if component_patterns:
@@ -89,4 +78,3 @@ def process_weight_transfer_with_component_normalization(target_obj, armature, b
         _process_obb_groups(ctx)
         _synthesize_weights(ctx)
 
-    print(f"総処理時間: {time.time() - start_total:.2f}秒")

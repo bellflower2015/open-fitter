@@ -8,12 +8,10 @@ import time
 
 
 def apply_metadata_fallback(context):
-    metadata_time_start = time.time()
     if context.cloth_metadata:
         mesh_name = context.target_obj.name
         if mesh_name in context.cloth_metadata:
             vertex_max_distances = context.cloth_metadata[mesh_name]
-            print(f"  メッシュのクロスメタデータを処理: {mesh_name}")
             count = 0
             for vert_idx in range(len(context.target_obj.data.vertices)):
                 max_distance = float(vertex_max_distances.get(str(vert_idx), 10.0))
@@ -29,6 +27,3 @@ def apply_metadata_fallback(context):
                             if group_name in context.target_obj.vertex_groups:
                                 context.target_obj.vertex_groups[group_name].add([vert_idx], weight, "REPLACE")
                         count += 1
-            print(f"  処理された頂点数: {count}")
-    metadata_time = time.time() - metadata_time_start
-    print(f"  クロスメタデータ処理: {metadata_time:.2f}秒")

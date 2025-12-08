@@ -13,8 +13,6 @@ def detect_finger_vertices(context):
                 for aux_bone in context.auxiliary_bones[humanoid_bone]:
                     context.finger_bone_names.add(aux_bone)
 
-    print(f"finger_bone_names: {context.finger_bone_names}")
-
     if not context.finger_bone_names:
         return
 
@@ -29,4 +27,3 @@ def detect_finger_vertices(context):
                         break
                 if weight > 0.001:
                     context.finger_vertices.add(vert.index)
-    print(f"finger_vertices: {len(context.finger_vertices)}")

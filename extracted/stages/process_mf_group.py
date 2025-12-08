@@ -27,19 +27,15 @@ def process_mf_group(context, group_name, temp_shape_name, rotation_deg, humanoi
                 break
 
     if not should_process:
-        print(f"  {group_name}グループが存在しないか、有効なウェイトがないため処理をスキップ")
         return
 
     if not (context.armature and context.armature.type == "ARMATURE"):
-        print(f"  {group_name}グループが存在しないか、アーマチュアが存在しないため処理をスキップ")
         return
 
-    print(f"  {group_name}グループが存在し、有効なウェイトを持つため処理を実行")
     base_humanoid_weights = store_weights(context.target_obj, context.bone_groups)
     reset_bone_weights(context.target_obj, context.bone_groups)
     restore_weights(context.target_obj, context.all_weights)
 
-    print(f"  {humanoid_label_left}と{humanoid_label_right}ボーンにY軸回転を適用")
     bpy.context.view_layer.objects.active = context.armature
     bpy.ops.object.mode_set(mode="POSE")
 
@@ -82,14 +78,12 @@ def process_mf_group(context, group_name, temp_shape_name, rotation_deg, humanoi
         temp_shape_key = None
 
     reset_bone_weights(context.target_obj, context.bone_groups)
-    print("  ウェイト転送開始")
     attempt_weight_transfer(context, bpy.data.objects["Body.BaseAvatar"], "BothSideWeights")
 
     restore_shape_key_state(context.target_obj, shape_key_state)
     if temp_shape_key:
         temp_shape_key.value = 0.0
 
-    print(f"  {humanoid_label_left}と{humanoid_label_right}ボーンにY軸逆回転を適用")
     bpy.context.view_layer.objects.active = context.armature
     bpy.ops.object.mode_set(mode="POSE")
 
@@ -115,7 +109,6 @@ def process_mf_group(context, group_name, temp_shape_name, rotation_deg, humanoi
 
     target_group = context.target_obj.vertex_groups.get(group_name)
     if target_group and base_humanoid_weights:
-        print("  ウェイト合成処理開始")
         for vert in context.target_obj.data.vertices:
             vert_idx = vert.index
             target_weight = 0.0
@@ -146,4 +139,3 @@ def process_mf_group(context, group_name, temp_shape_name, rotation_deg, humanoi
                             base_humanoid_weights[vert_idx][group_name] = 0.0
                         except RuntimeError:
                             pass
-        print("  ウェイト合成処理完了")

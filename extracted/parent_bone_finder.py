@@ -52,8 +52,6 @@ def find_parent_bones(
             base_group_index_to_name,
         )
         parent_bones[bone_name] = chosen_parent
-        print(f"bone_name: {bone_name}, chosen_parent: {chosen_parent}")
-
     return parent_bones
 
 
@@ -102,7 +100,6 @@ def _find_parent_for_bone(
 
     chosen_parent = None
     if bone_scores:
-        print(f"bone_scores: {bone_scores}")
         chosen_parent = max(bone_scores.items(), key=lambda item: item[1])[0]
 
     # Avoid self-reference
@@ -168,8 +165,6 @@ def _calculate_bone_scores(
             if weight >= 0.001:
                 vertex_world_co = mesh_world_matrix @ vertex.co
                 weighted_vertices.append((vertex_world_co, weight))
-
-        print(f"bone_name: {bone_name}, weighted_vertices: {len(weighted_vertices)}")
 
     if weighted_vertices:
         weighted_vertices.sort(key=lambda item: item[1], reverse=True)

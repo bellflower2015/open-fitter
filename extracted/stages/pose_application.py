@@ -50,8 +50,6 @@ class PoseApplicationStage:
 
         # ポーズ適用
         print("Status: ポーズ適用中")
-        print(f"Progress: {(p.pair_index + 0.35) / p.total_pairs * 0.9:.3f}")
-
         add_clothing_pose_from_json(
             p.clothing_armature,
             p.config_pair['pose_data'],
@@ -60,20 +58,10 @@ class PoseApplicationStage:
             p.config_pair['base_avatar_data'],
         )
 
-        pose_time = time.time()
-        print(f"ポーズ適用: {pose_time - p.blendshape_time:.2f}秒")
-
         # 重複頂点属性設定
-        print("Status: 重複頂点属性設定中")
-        print(f"Progress: {(p.pair_index + 0.4) / p.total_pairs * 0.9:.3f}")
-
         create_overlapping_vertices_attributes(p.clothing_meshes, p.base_avatar_data)
-
-        vertices_attributes_time = time.time()
-        print(f"重複頂点属性設定: {vertices_attributes_time - pose_time:.2f}秒")
 
         # ヒンジボーングループ作成
         for obj in p.clothing_meshes:
             create_hinge_bone_group(obj, p.clothing_armature, p.clothing_avatar_data)
 
-        p.pose_time = time.time()

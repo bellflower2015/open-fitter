@@ -84,7 +84,6 @@ def _store_original_vertex_weights(ctx: WeightTransferContext):
                 weights[group_name] = weight
         original_vertex_weights[vert_idx] = weights
     ctx.original_vertex_weights = original_vertex_weights
-    print(f"元のウェイト保存時間: {time.time() - start_time:.2f}秒")
     return original_vertex_weights
 
 
@@ -174,7 +173,6 @@ def _normalize_component_patterns(ctx: WeightTransferContext, component_patterns
         new_pattern = tuple(sorted((k, round(v, 4)) for k, v in avg_weights.items() if v > 0.0001))
         new_component_patterns[(new_pattern, original_pattern)] = components
 
-    print(f"コンポーネントパターン正規化時間: {time.time() - start_time:.2f}秒")
     ctx.component_patterns = new_component_patterns
     return new_component_patterns
 
@@ -194,7 +192,6 @@ def _collect_obb_data(ctx: WeightTransferContext):
     eval_mesh = eval_obj.data
 
     if len(eval_mesh.vertices) == 0:
-        print(f"警告: {ctx.target_obj.name} の評価済みメッシュに頂点がありません。OBB計算をスキップします。")
         return obb_data
 
     all_rigid_component_vertices = set()
@@ -236,7 +233,6 @@ def _collect_obb_data(ctx: WeightTransferContext):
                         cluster_coords.append(eval_obj.matrix_world @ eval_mesh.vertices[vert_idx].co)
 
             if len(cluster_coords) < 3:
-                print(f"警告: パターン {new_pattern} のクラスター {cluster_idx} の有効な頂点が少なすぎます（{len(cluster_coords)}点）。スキップします。")
                 continue
 
             obb = calculate_obb_from_points(cluster_coords)
@@ -257,11 +253,9 @@ def _collect_obb_data(ctx: WeightTransferContext):
                     if all(proj <= radius for proj, radius in zip(projections, obb['radii'])):
                         vertices_in_obb.append(vert_idx)
                 except Exception as e:
-                    print(f"警告: 頂点 {vert_idx} のOBBチェック中にエラーが発生しました: {e}")
                     continue
 
             if not vertices_in_obb:
-                print(f"警告: パターン {new_pattern} のクラスター {cluster_idx} のOBB内に頂点が見つかりませんでした。スキップします。")
                 continue
 
             obb_data.append({
@@ -273,7 +267,6 @@ def _collect_obb_data(ctx: WeightTransferContext):
             })
             component_count += 1
 
-    print(f"OBBデータ収集時間: {time.time() - start_time:.2f}秒")
     ctx.obb_data = obb_data
     return obb_data
 
@@ -286,36 +279,25 @@ def _process_obb_groups(ctx: WeightTransferContext):
     ctx.neighbors_info = neighbors_info
     ctx.offsets = offsets
     ctx.num_verts = num_verts
-    print(f"頂点近傍リスト作成時間: {time.time() - start_time:.2f}秒")
-
     start_time = time.time()
     bpy.ops.object.mode_set(mode='EDIT')
 
     for obb_idx, data in enumerate(ctx.obb_data):
-        obb_start = time.time()
         connected_group = ctx.target_obj.vertex_groups.new(name=f"Connected_{data['component_id']}")
-        print(f"    Connected頂点グループ作成: {connected_group.name}")
-
         bpy.ops.mesh.select_all(action='DESELECT')
         bm = bmesh.from_edit_mesh(ctx.target_obj.data)
         bm.verts.ensure_lookup_table()
 
-        obb_vertex_select_start = time.time()
         for vert_idx in data['vertices_in_obb']:
             if vert_idx < len(bm.verts):
                 bm.verts[vert_idx].select = True
         bmesh.update_edit_mesh(ctx.target_obj.data)
-        print(f"    OBB内頂点選択時間: {time.time() - obb_vertex_select_start:.2f}秒")
-
-        edge_loop_start = time.time()
         initial_selection = {v.index for v in bm.verts if v.select}
 
         if initial_selection:
             selected_edges = [e for e in bm.edges if all(v.select for v in e.verts)]
             complete_loops = set()
             edge_count = len(selected_edges)
-            print(f"    処理対象エッジ数: {edge_count}")
-
             for edge_idx, edge in enumerate(selected_edges):
                 if edge_idx % 100 == 0 and edge_idx > 0:
                     print(f"    エッジ処理進捗: {edge_idx}/{edge_count} ({edge_idx/edge_count*100:.1f}%)")
@@ -369,30 +351,17 @@ def _process_obb_groups(ctx: WeightTransferContext):
                     vert.select = True
             bmesh.update_edit_mesh(ctx.target_obj.data)
 
-        print(f"    エッジループ検出時間: {time.time() - edge_loop_start:.2f}秒")
-
-        select_more_start = time.time()
         for _ in range(1):
             bpy.ops.mesh.select_more()
         bm = bmesh.from_edit_mesh(ctx.target_obj.data)
         selected_verts = [v.index for v in bm.verts if v.select]
-        print(f"    選択範囲拡大時間: {time.time() - select_more_start:.2f}秒")
-
         if len(selected_verts) == 0:
-            print(f"警告: OBB {obb_idx} 内に頂点が見つかりませんでした。スキップします。")
             continue
 
-        mode_switch_start = time.time()
         bpy.ops.object.mode_set(mode='OBJECT')
-        print(f"    モード切替時間: {time.time() - mode_switch_start:.2f}秒")
-
-        weight_assign_start = time.time()
         for vert_idx in selected_verts:
             if vert_idx not in data['component_vertices']:
                 connected_group.add([vert_idx], 1.0, 'REPLACE')
-        print(f"    ウェイト割り当て時間: {time.time() - weight_assign_start:.2f}秒")
-
-        smoothing_start = time.time()
         bpy.ops.object.select_all(action='DESELECT')
         ctx.target_obj.select_set(True)
         bpy.context.view_layer.objects.active = ctx.target_obj
@@ -404,18 +373,9 @@ def _process_obb_groups(ctx: WeightTransferContext):
 
         bpy.ops.object.mode_set(mode='WEIGHT_PAINT')
 
-        smooth_op_start = time.time()
         bpy.ops.object.vertex_group_smooth(factor=0.5, repeat=3, expand=0.5)
-        print(f"    標準スムージング時間: {time.time() - smooth_op_start:.2f}秒")
-
-        custom_smooth_start = time.time()
         custom_max_vertex_group_numpy(ctx.target_obj, f"Connected_{data['component_id']}", ctx.neighbors_info, ctx.offsets, ctx.num_verts, repeat=3, weight_factor=1.0)
-        print(f"    カスタムスムージング時間: {time.time() - custom_smooth_start:.2f}秒")
-
         bpy.ops.object.mode_set(mode='OBJECT')
-        print(f"    スムージング処理時間: {time.time() - smoothing_start:.2f}秒")
-
-        decay_start = time.time()
         connected_group = ctx.target_obj.vertex_groups[f"Connected_{data['component_id']}"]
         original_pattern_weights = data['original_pattern_weights']
 
@@ -450,16 +410,10 @@ def _process_obb_groups(ctx: WeightTransferContext):
                         connected_group.add([vert_idx], connected_weight * decay_factor, 'REPLACE')
                 else:
                     connected_group.add([vert_idx], 0.0, 'REPLACE')
-        print(f"    ウェイト減衰時間: {time.time() - decay_start:.2f}秒")
-
-        print(f"  OBB {obb_idx+1}/{len(ctx.obb_data)} 処理時間: {time.time() - obb_start:.2f}秒")
-
         if obb_idx < len(ctx.obb_data) - 1:
             bpy.ops.object.mode_set(mode='EDIT')
 
     bpy.ops.object.mode_set(mode='OBJECT')
-    print(f"OBB処理時間: {time.time() - start_time:.2f}秒")
-
 
 def _synthesize_weights(ctx: WeightTransferContext):
     import time
@@ -467,7 +421,6 @@ def _synthesize_weights(ctx: WeightTransferContext):
     connected_groups = [vg for vg in ctx.target_obj.vertex_groups if vg.name.startswith("Connected_")]
 
     if not connected_groups:
-        print(f"ウェイト合成時間: {time.time() - start_time:.2f}秒")
         return
 
     for vert in ctx.target_obj.data.vertices:
@@ -544,4 +497,3 @@ def _synthesize_weights(ctx: WeightTransferContext):
             group = ctx.target_obj.vertex_groups[group_name]
             group.add([vert.index], weight, 'REPLACE')
 
-    print(f"ウェイト合成時間: {time.time() - start_time:.2f}秒")

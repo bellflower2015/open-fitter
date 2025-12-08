@@ -39,12 +39,7 @@ def apply_blendshape_operation(target_obj, operation, target_shape_key, rigid_tr
         to_step = operation['to_step']
         field_type = operation['field_type']
         
-        print(f"Applying operation: {operation['blend_shape']} "
-              f"({operation['from_value']} -> {operation['to_value']}) "
-              f"steps {from_step}->{to_step}/{num_steps}")
-        
         if not os.path.exists(field_file_path):
-            print(f"Warning: Deformation field file not found: {field_file_path}")
             return
         
         # ステップ間の変換を計算
@@ -124,7 +119,6 @@ def apply_blendshape_operation(target_obj, operation, target_shape_key, rigid_tr
         return target_shape_key
         
     except Exception as e:
-        print(f"Error applying operation {operation['blend_shape']}: {e}")
         import traceback
         traceback.print_exc()
 

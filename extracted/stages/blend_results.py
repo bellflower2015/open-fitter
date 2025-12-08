@@ -8,7 +8,6 @@ import time
 
 
 def blend_results(context):
-    weight_blend_time_start = time.time()
     for vert_idx in range(len(context.target_obj.data.vertices)):
         falloff_weight = 0.0
         for g in context.target_obj.data.vertices[vert_idx].groups:
@@ -28,5 +27,3 @@ def blend_results(context):
                         group.remove([vert_idx])
                     except RuntimeError:
                         pass
-    weight_blend_time = time.time() - weight_blend_time_start
-    print(f"  ウェイト合成: {weight_blend_time:.2f}秒")

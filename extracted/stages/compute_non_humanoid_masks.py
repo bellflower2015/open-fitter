@@ -21,11 +21,6 @@ def compute_non_humanoid_masks(context):
     context.new_groups = set(vg.name for vg in context.target_obj.vertex_groups)
     context.added_groups = context.new_groups - context.original_groups
 
-    print(f"  ボーングループ: {context.bone_groups}")
-    print(f"  オリジナルグループ: {context.original_groups}")
-    print(f"  新規グループ: {context.new_groups}")
-    print(f"  追加グループ: {context.added_groups}")
-
     num_vertices = len(context.target_obj.data.vertices)
     all_transferred_weights = store_weights(context.target_obj, context.all_deform_groups)
 
@@ -40,7 +35,6 @@ def compute_non_humanoid_masks(context):
                 parent_humanoid_name = clothing_bone_to_humanoid[current_bone.name]
                 break
             current_bone = current_bone.parent
-        print(f"current_bone_name: {current_bone_name}, parent_humanoid_name: {parent_humanoid_name}")
         if parent_humanoid_name:
             clothing_bone_to_parent_humanoid[current_bone_name] = parent_humanoid_name
 
@@ -147,7 +141,6 @@ def compute_non_humanoid_masks(context):
     bpy.ops.paint.vert_select_all(action="SELECT")
     bpy.ops.object.vertex_group_smooth(factor=0.5, repeat=5, expand=0.5)
 
-    falloff_mask_time_start = time.time()
     sway_settings = context.base_avatar_data.get("commonSwaySettings", {"startDistance": 0.025, "endDistance": 0.050})
     context.distance_falloff_group = create_distance_falloff_transfer_mask(
         context.target_obj,
@@ -158,9 +151,6 @@ def compute_non_humanoid_masks(context):
     )
     context.target_obj.vertex_groups.active_index = context.distance_falloff_group.index
     bpy.ops.object.vertex_group_smooth(factor=1, repeat=3, expand=0.1)
-    falloff_mask_time = time.time() - falloff_mask_time_start
-    print(f"  距離フォールオフマスク作成: {falloff_mask_time:.2f}秒")
-
     context.distance_falloff_group2 = create_distance_falloff_transfer_mask(
         context.target_obj,
         context.base_avatar_data,
@@ -170,8 +160,6 @@ def compute_non_humanoid_masks(context):
     )
     context.target_obj.vertex_groups.active_index = context.distance_falloff_group2.index
     bpy.ops.object.vertex_group_smooth(factor=1, repeat=3, expand=0.1)
-    print(f"  distance_falloff_group2: {context.distance_falloff_group2.index}")
-
     bpy.ops.object.mode_set(mode=current_mode)
 
     non_humanoid_difference_weights = np.zeros(num_vertices)

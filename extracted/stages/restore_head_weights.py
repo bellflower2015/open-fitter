@@ -8,7 +8,6 @@ import time
 
 
 def restore_head_weights(context):
-    head_time_start = time.time()
     head_bone_name = None
     if context.base_avatar_data and "humanoidBones" in context.base_avatar_data:
         for bone_data in context.base_avatar_data["humanoidBones"]:
@@ -17,7 +16,6 @@ def restore_head_weights(context):
                 break
 
     if head_bone_name and head_bone_name in context.target_obj.vertex_groups:
-        print(f"  Headボーンウェイトを処理中: {head_bone_name}")
         head_vertices_count = 0
         for vert_idx in range(len(context.target_obj.data.vertices)):
             original_head_weight = 0.0
@@ -75,7 +73,3 @@ def restore_head_weights(context):
                             new_weight = current_weight + additional_weight
                             group.add([vert_idx], new_weight, "REPLACE")
             head_vertices_count += 1
-        if head_vertices_count > 0:
-            print(f"  Headウェイト処理完了: {head_vertices_count}頂点")
-    head_time = time.time() - head_time_start
-    print(f"  Headウェイト処理: {head_time:.2f}秒")

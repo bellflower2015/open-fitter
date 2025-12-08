@@ -22,12 +22,10 @@ def main_v1(args, config_pairs, start_time):
     print(f"\n{'='*60}")
     print(f"OutfitRetargetPipeline V1 - is_final_pair最適化版")
     print(f"{'='*60}")
-    print(f"config_pairs数: {len(config_pairs)}")
     print(f"{'='*60}")
 
     success = True
     for i, config_pair in enumerate(config_pairs):
-        print(f"\n--- Processing config_pair {i+1}/{len(config_pairs)} ---")
         pipeline = OutfitRetargetPipeline(
             args, config_pair, i, len(config_pairs), start_time
         )
@@ -54,15 +52,10 @@ def main():
         print(f"Status: アドオン有効化中")
         print(f"Progress: 0.01")
         bpy.ops.preferences.addon_enable(module='robust-weight-transfer')
-        print(f"Addon enabled: {time.time() - start_time:.2f}秒")
-
         # Parse command line arguments
         print(f"Status: 引数解析中")
         print(f"Progress: 0.02")
         args, config_pairs = parse_args()
-        parse_time = time.time()
-        print(f"引数解析: {parse_time - start_time:.2f}秒")
-
         # V1パイプラインを実行
         print("Using Pipeline V1 (is_final_pair最適化版)")
         success = main_v1(args, config_pairs, start_time)
@@ -71,8 +64,6 @@ def main():
         print(f"Progress: 1.00")
         print(f"\n{'='*60}")
         print(f"全体処理完了")
-        print(f"結果: {'成功' if success else '失敗'}")
-        print(f"合計時間: {total_time:.2f}秒")
         print(f"{'='*60}")
         
         return success
@@ -80,7 +71,6 @@ def main():
     except Exception as e:
         import traceback
         print("============= Fatal Error =============")
-        print(f"Error message: {str(e)}")
         print("\n============= Full Stack Trace =============")
         print(traceback.format_exc())
         print("=====================================")

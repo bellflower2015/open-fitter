@@ -230,7 +230,6 @@ def calculate_inverse_pose_matrix(mesh_obj, armature_obj, vertex_index):
     # 頂点グループとウェイトの取得
     weights = get_vertex_groups_and_weights(mesh_obj, vertex_index)
     if not weights:
-        print(f"頂点 {vertex_index} にウェイトが割り当てられていません")
         return None
 
     # 最終的な変換行列の初期化
@@ -262,7 +261,6 @@ def calculate_inverse_pose_matrix(mesh_obj, armature_obj, vertex_index):
     try:
         return final_matrix.inverted()
     except Exception as e:
-        print(f"error: {e}")
         return Matrix.Identity(4)
 
 # Merged from copy_bone_transform.py
@@ -457,5 +455,4 @@ def calculate_obb_from_points(points):
             'radii': radii
         }
     except Exception as e:
-        print(f"OBB計算中にエラーが発生しました: {e}")
         return None

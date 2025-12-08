@@ -70,27 +70,15 @@ class WeightTransferPreparationStage:
             right_base_mesh, left_base_mesh = duplicate_mesh_with_partial_weights(
                 p.base_mesh, p.base_avatar_data
             )
-            duplicate_time = time.time()
-            print(f"ベースメッシュ複製: {duplicate_time - p.cycle1_end_time:.2f}秒")
-        else:
-            # 中間pairではbase_meshがNoneのためスキップ
-            duplicate_time = time.time()
-
+        # 中間pairではbase_meshがNoneのためスキップ
+        
         # 包含関係検出
-        print("Status: メッシュの包含関係検出中")
-        print(f"Progress: {(p.pair_index + 0.5) / p.total_pairs * 0.9:.3f}")
         p.containing_objects = find_containing_objects(p.clothing_meshes, threshold=0.04)
         print(
             f"Found {sum(len(contained) for contained in p.containing_objects.values())} objects that are contained within others"
         )
-        containing_time = time.time()
-        print(f"包含関係検出: {containing_time - duplicate_time:.2f}秒")
-
         # 前処理開始
         print("Status: サイクル2前処理中")
-        print(f"Progress: {(p.pair_index + 0.55) / p.total_pairs * 0.9:.3f}")
-        cycle2_pre_start = time.time()
-
         # ボーンデータ準備（最終pairのみ）
         if is_final_pair:
             self._apply_sub_bone_data(p)
@@ -106,9 +94,6 @@ class WeightTransferPreparationStage:
         p.armature_settings_dict = {}
         for obj in p.clothing_meshes:
             self._preprocess_mesh(obj, p, time, is_final_pair)
-
-        cycle2_pre_end = time.time()
-        print(f"サイクル2前処理全体: {cycle2_pre_end - cycle2_pre_start:.2f}秒")
 
         print(
             f"config_pair.get('next_blendshape_settings', []): {p.config_pair.get('next_blendshape_settings', [])}"
@@ -216,7 +201,6 @@ class WeightTransferPreparationStage:
 
     def _preprocess_mesh(self, obj, p, time, is_final_pair):
         """単一メッシュの前処理"""
-        obj_start = time.time()
         print("cycle2 (pre-weight transfer) " + obj.name)
 
         # アーマチュア設定を保存
@@ -255,4 +239,3 @@ class WeightTransferPreparationStage:
             # 中間pair: アーマチュア設定復元のみ
             restore_armature_modifier(obj, p.armature_settings_dict[obj])
 
-        print(f"  {obj.name}の前処理: {time.time() - obj_start:.2f}秒")

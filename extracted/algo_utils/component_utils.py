@@ -173,8 +173,6 @@ def _debug_dump_patterns(obj_name, components, component_patterns):
     print(f"Found {len(component_patterns)} uniform weight patterns in {obj_name}")
     for i, (pattern, components_list) in enumerate(component_patterns.items()):
         total_vertices = sum(len(comp) for comp in components_list)
-        print(f"Pattern {i}: {pattern}")
-        print(f"  Components: {len(components_list)}, Total vertices: {total_vertices}")
         for j, comp in enumerate(components_list):
             print(f"    Component {j}: {len(comp)} vertices")
 
@@ -371,8 +369,6 @@ class _ComponentSeparationContext:
                     if bone_name:
                         self.allowed_bones.add(bone_name)
 
-        print(f"Allowed bones for separation: {sorted(self.allowed_bones)}")
-
     def has_allowed_bone_weights(self, weights: Dict[str, float]) -> bool:
         if not self.allowed_bones:
             return True
@@ -417,7 +413,6 @@ class _ComponentSeparationContext:
                     for name_pattern in self.do_not_separate_names:
                         if name_pattern in temp_name:
                             should_separate = False
-                            print(f"Component {i} in {self.mesh_obj.name} name matches do_not_separate pattern: {name_pattern}")
                             weight_hash_do_not_separate.append(weight_hash)
                             break
 
@@ -425,7 +420,6 @@ class _ComponentSeparationContext:
                         for hash_val in weight_hash_do_not_separate:
                             if hash_val == weight_hash:
                                 should_separate = False
-                                print(f"Component {i} in {self.mesh_obj.name} weight hash matches do_not_separate pattern: {hash_val}")
                                 break
 
                     if should_separate:
@@ -534,7 +528,6 @@ class _ComponentSeparationContext:
                 should_separate = True
                 for name_pattern in self.do_not_separate_names:
                     if name_pattern in cluster_name:
-                        print(f"Component {cluster_idx} in {cluster_name} name matches do_not_separate pattern: {name_pattern}")
                         for component, _ in components_with_coords:
                             self.non_uniform_components.append(component)
                         should_separate = False
@@ -563,13 +556,12 @@ class _ComponentSeparationContext:
 
     def report(self, uniform_objects: List[bpy.types.Object], non_uniform_obj: Optional[bpy.types.Object]):
         if non_uniform_obj:
-            print(f"Non-separated object '{non_uniform_obj.name}' vertex count: {len(non_uniform_obj.data.vertices)}")
+            pass
         else:
             print("No non-separated object.")
 
         for sep_obj in uniform_objects:
-            print(f"Separated object '{sep_obj.name}' vertex count: {len(sep_obj.data.vertices)}")
-
+            pass
 
 def separate_and_combine_components(mesh_obj, clothing_armature, do_not_separate_names=None, clustering=True, clothing_avatar_data=None):
     """

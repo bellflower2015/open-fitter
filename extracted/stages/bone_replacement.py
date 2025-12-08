@@ -42,12 +42,8 @@ class BoneReplacementStage:
         time = p.time_module
         is_final_pair = (p.pair_index == p.total_pairs - 1)
 
-        print("Status: ヒューマノイドボーン置換中")
-        print(f"Progress: {(p.pair_index + 0.95) / p.total_pairs * 0.9:.3f}")
-
         # 中間pairではボーン置換をスキップ（base_armatureがNone）
         if not is_final_pair:
-            p.bones_replace_time = time.time()
             return
 
         # ベースポーズファイルパスの取得
@@ -84,7 +80,4 @@ class BoneReplacementStage:
                 True,
             )
 
-        bones_replace_time = time.time()
-        print(f"ヒューマノイドボーン置換: {bones_replace_time - p.propagated_end_time:.2f}秒")
-
-        p.bones_replace_time = bones_replace_time
+        p.bones_replace_time = time.time()

@@ -42,8 +42,6 @@ def apply_blendshape_deformation_fields(target_obj, field_data_path, blend_shape
         for label in blend_shape_labels:
             blend_shape_value_dict[label] = 1.0
     
-    print(f"ブレンドシェイプ値: {blend_shape_value_dict}")
-    
     # オリジナルの頂点位置を取得
     depsgraph = bpy.context.evaluated_depsgraph_get()
     eval_obj = target_obj.evaluated_get(depsgraph)
@@ -75,7 +73,6 @@ def apply_blendshape_deformation_fields(target_obj, field_data_path, blend_shape
                     start_value = 0.0
                 end_value = 1.0  # 終了値は常に1.0
                 
-                print(f"Applying inverted blend shape field for {label}: {start_value} -> {end_value}")
                 field_info_blend = get_deformation_field_multi_step(blend_field_path)
                 blend_points = field_info_blend['all_field_points']
                 blend_deltas = field_info_blend['all_delta_positions']
@@ -140,7 +137,6 @@ def apply_blendshape_deformation_fields(target_obj, field_data_path, blend_shape
                         start_value = blend_shape_value_dict[label]
                         end_value = 1.0  # 終了値は常に1.0
                         
-                        print(f"Applying blend shape field for {label}: {start_value} -> {end_value}")
                         field_info_blend = get_deformation_field_multi_step(blend_field_path)
                         blend_points = field_info_blend['all_field_points']
                         blend_deltas = field_info_blend['all_delta_positions']
@@ -184,7 +180,6 @@ def apply_blendshape_deformation_fields(target_obj, field_data_path, blend_shape
                             inv_shape_key.data[i].co = local_pos - base_displacement
                             matrix_armature_inv_fallback = matrix_armature_inv
 
-                print(f"Created shape key: {shape_key_name}")
                 print(f"Created inverse shape key: {label}_temp")
             else:
                 print(f"Warning: Field file not found for blend shape {label}")

@@ -48,8 +48,6 @@ def remove_empty_vertex_groups(mesh_obj: bpy.types.Object) -> None:
     for group_name in groups_to_remove:
         if group_name in mesh_obj.vertex_groups:
             mesh_obj.vertex_groups.remove(mesh_obj.vertex_groups[group_name])
-            print(f"Removed empty vertex group: {group_name}")
-
 # Merged from merge_vertex_group_weights.py
 
 def merge_vertex_group_weights(mesh_obj: bpy.types.Object, source_group_name: str, target_group_name: str) -> None:
@@ -173,7 +171,6 @@ def apply_max_filter_to_vertex_group(cloth_obj, vertex_group_name, filter_radius
     start_time = time.time()
     
     if vertex_group_name not in cloth_obj.vertex_groups:
-        print(f"エラー: 頂点グループ '{vertex_group_name}' が見つかりません")
         return
     
     vertex_group = cloth_obj.vertex_groups[vertex_group_name]
@@ -234,8 +231,6 @@ def apply_max_filter_to_vertex_group(cloth_obj, vertex_group_name, filter_radius
     bpy.ops.object.mode_set(mode=current_mode)
     
     total_time = time.time() - start_time
-    print(f"  Maxフィルター完了: {total_time:.2f}秒")
-
 # Merged from apply_min_filter_to_vertex_group.py
 
 def apply_min_filter_to_vertex_group(cloth_obj, vertex_group_name, filter_radius=0.02, filter_mask=None):
@@ -252,7 +247,6 @@ def apply_min_filter_to_vertex_group(cloth_obj, vertex_group_name, filter_radius
     start_time = time.time()
     
     if vertex_group_name not in cloth_obj.vertex_groups:
-        print(f"エラー: 頂点グループ '{vertex_group_name}' が見つかりません")
         return
     
     vertex_group = cloth_obj.vertex_groups[vertex_group_name]
@@ -313,8 +307,6 @@ def apply_min_filter_to_vertex_group(cloth_obj, vertex_group_name, filter_radius
     bpy.ops.object.mode_set(mode=current_mode)
     
     total_time = time.time() - start_time
-    print(f"  Minフィルター完了: {total_time:.2f}秒")
-
 # Merged from apply_smoothing_to_vertex_group.py
 
 def apply_smoothing_to_vertex_group(cloth_obj, vertex_group_name, smoothing_radius=0.02, iteration=1, use_distance_weighting=True, gaussian_falloff=True, neighbors_cache=None):
@@ -332,7 +324,6 @@ def apply_smoothing_to_vertex_group(cloth_obj, vertex_group_name, smoothing_radi
     start_time = time.time()
     
     if vertex_group_name not in cloth_obj.vertex_groups:
-        print(f"エラー: 頂点グループ '{vertex_group_name}' が見つかりません")
         return
     
     vertex_group = cloth_obj.vertex_groups[vertex_group_name]
@@ -430,8 +421,6 @@ def apply_smoothing_to_vertex_group(cloth_obj, vertex_group_name, smoothing_radi
     bpy.ops.object.mode_set(mode=current_mode)
     
     total_time = time.time() - start_time
-    print(f"  スムージング完了: {total_time:.2f}秒")
-
     return neighbors_cache
 
 # Merged from custom_max_vertex_group_numpy.py
@@ -451,7 +440,6 @@ def custom_max_vertex_group_numpy(obj, group_name, neighbors_info, offsets, num_
         weight_factor: 周辺頂点からの最大値に掛ける係数
     """
     if group_name not in obj.vertex_groups:
-        print(f"頂点グループ '{group_name}' が見つかりません")
         return
     
     group_index = obj.vertex_groups[group_name].index
@@ -642,8 +630,6 @@ def process_humanoid_vertex_groups(mesh_obj: bpy.types.Object, clothing_armature
             print(f"Adding optional humanoid bone group: {humanoid_name} ({bone_name})")
             if bone_name not in existing_groups:
                 mesh_obj.vertex_groups.new(name=bone_name)
-            else:
-                print(f"Optional humanoid bone group already exists: {bone_name}")
             # 補助ボーンの頂点グループを追加
             if bone_name in auxiliary_bones:
                 # 補助ボーンの頂点グループを作成

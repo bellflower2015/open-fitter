@@ -106,8 +106,6 @@ def adjust_armature_hips_position(armature_obj: bpy.types.Object, target_positio
     
     # 現在位置と目標位置の差を計算
     offset = target_position - current_position
-    print(f"Hip Offset: {offset}")
-    
     # 位置の差が十分小さい場合は処理をスキップ
     if offset.length < 0.0001:  # 0.1mm未満の差は無視
         print("Hips position is already at target position, skipping adjustment")
@@ -210,8 +208,6 @@ def normalize_clothing_bone_names(clothing_armature: bpy.types.Object, clothing_
     
     # Get all bone names from clothing armature
     armature_bone_names = {bone.name for bone in clothing_armature.data.bones}
-    print(f"Available bones in clothing armature: {sorted(armature_bone_names)}")
-    
     # Store name changes for vertex group updates
     bone_name_changes = {}
     
@@ -251,8 +247,6 @@ def normalize_clothing_bone_names(clothing_armature: bpy.types.Object, clothing_
     
     # Update vertex group names in all clothing meshes
     if bone_name_changes:
-        print(f"Updating vertex groups with bone name changes: {bone_name_changes}")
-        
         for mesh_obj in clothing_meshes:
             if not mesh_obj or mesh_obj.type != 'MESH':
                 continue
@@ -264,7 +258,6 @@ def normalize_clothing_bone_names(clothing_armature: bpy.types.Object, clothing_
                     print(f"Updated vertex group '{old_name}' -> '{new_name}' in mesh '{mesh_obj.name}'")
         
         # Update bone names in clothing armature
-        print(f"Updating bone names in clothing armature: {bone_name_changes}")
         for old_name, new_name in bone_name_changes.items():
             if old_name in clothing_armature.data.bones:
                 bone = clothing_armature.data.bones[old_name]

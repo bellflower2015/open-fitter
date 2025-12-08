@@ -57,19 +57,16 @@ def parse_args():
     ]
     for path in required_paths:
         if not os.path.exists(path):
-            print(f"Error: File not found: {path}")
             sys.exit(1)
     
     # Validate all base-fbx files exist
     for path in base_fbx_paths:
         if not os.path.exists(path):
-            print(f"Error: Base FBX file not found: {path}")
             sys.exit(1)
     
     # Validate all config files exist
     for path in config_paths:
         if not os.path.exists(path):
-            print(f"Error: Config file not found: {path}")
             sys.exit(1)
     
     # Process each config file and create configuration pairs
@@ -123,16 +120,12 @@ def parse_args():
             clothing_avatar_data_path = config_data.get('clothingAvatarDataPath')
             
             if not pose_data_path:
-                print(f"Error: poseDataPath not found in config file: {config_path}")
                 sys.exit(1)
             if not field_data_path:
-                print(f"Error: fieldDataPath not found in config file: {config_path}")
                 sys.exit(1)
             if not base_avatar_data_path:
-                print(f"Error: baseAvatarDataPath not found in config file: {config_path}")
                 sys.exit(1)
             if not clothing_avatar_data_path:
-                print(f"Error: clothingAvatarDataPath not found in config file: {config_path}")
                 sys.exit(1)
             
             # Convert relative paths to absolute paths
@@ -179,7 +172,6 @@ def parse_args():
                     try:
                         blend_shape_values = [float(v.strip()) for v in args.blend_shape_values.split(',')]
                     except ValueError as e:
-                        print(f"Error: Invalid blend shape values format: {e}")
                         sys.exit(1)
                 # Parse blend shape mappings if provided
                 if args.blend_shape_mappings:
@@ -191,7 +183,6 @@ def parse_args():
                                 label, custom_name = pair.split(',', 1)
                                 blend_shape_mappings[label.strip()] = custom_name.strip()
                     except ValueError as e:
-                        print(f"Error: Invalid blend shape mappings format: {e}")
                         sys.exit(1)
                 # Parse mesh renderers if provided
                 if args.mesh_renderers:
@@ -202,9 +193,7 @@ def parse_args():
                             if pair.strip():
                                 mesh_name, parent_name = pair.split(':', 1)
                                 mesh_renderers[mesh_name.strip()] = parent_name.strip()
-                        print(f"Parsed mesh renderers: {mesh_renderers}")
                     except ValueError as e:
-                        print(f"Error: Invalid mesh renderers format: {e}")
                         sys.exit(1)
                 input_clothing_fbx_path = args.input;
             
@@ -237,10 +226,8 @@ def parse_args():
             config_pairs.append(config_pair)
             
         except json.JSONDecodeError as e:
-            print(f"Error: Invalid JSON in config file {config_path}: {e}")
             sys.exit(1)
         except Exception as e:
-            print(f"Error reading config file {config_path}: {e}")
             sys.exit(1)
     
     # Process BlendShape transitions for consecutive config pairs
@@ -248,10 +235,6 @@ def parse_args():
         for i in range(len(config_pairs) - 1):
             process_blendshape_transitions(config_pairs[i], config_pairs[i + 1])
         config_pairs[len(config_pairs) - 1]['next_blendshape_settings'] = config_pairs[len(config_pairs) - 1]['config_data'].get('targetBlendShapeSettings', [])
-    
-    for i in range(len(config_pairs)):
-        if config_pairs[i].get('next_blendshape_settings', None):
-            print(f"config_pairs[{i}]['next_blendshape_settings']: {config_pairs[i]['next_blendshape_settings']}")
     
     # 中間pairではbase_fbxを使用しない（最終pairでのみターゲットアバターFBXをロード）
     # Template.fbx依存を排除するため、中間pairのbase_fbxをNoneに設定

@@ -106,7 +106,6 @@ def create_side_weight_groups(mesh_obj: bpy.types.Object, base_avatar_data: dict
    
    clothing_bone_to_humanoid = {bone_map["boneName"]: bone_map["humanoidBoneName"] 
                            for bone_map in clothing_avatar_data["humanoidBones"]}
-   print(f"clothing_bone_to_humanoid: {clothing_bone_to_humanoid}")
    for clothing_bone in clothing_armature.data.bones:
         current_bone = clothing_bone
         current_bone_name = current_bone.name
@@ -116,7 +115,6 @@ def create_side_weight_groups(mesh_obj: bpy.types.Object, base_avatar_data: dict
                 parent_humanoid_name = clothing_bone_to_humanoid[current_bone.name]
                 break
             current_bone = current_bone.parent
-        print(f"current_bone_name: {current_bone_name}, parent_humanoid_name: {parent_humanoid_name}")
         if parent_humanoid_name:
             if parent_humanoid_name in ignored_bones:
                 continue

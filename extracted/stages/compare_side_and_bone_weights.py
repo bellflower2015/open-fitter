@@ -8,7 +8,6 @@ import time
 
 
 def compare_side_and_bone_weights(context):
-    comparison_time_start = time.time()
     side_left_group = context.target_obj.vertex_groups.get("LeftSideWeights")
     side_right_group = context.target_obj.vertex_groups.get("RightSideWeights")
     failed_vertices_count = 0
@@ -40,7 +39,3 @@ def compare_side_and_bone_weights(context):
                         if group_name in context.target_obj.vertex_groups:
                             context.target_obj.vertex_groups[group_name].add([vert.index], weight, "REPLACE")
                 failed_vertices_count += 1
-    if failed_vertices_count > 0:
-        print(f"  ウェイト転送失敗: {failed_vertices_count}頂点 -> オリジナルウェイトにフォールバック")
-    comparison_time = time.time() - comparison_time_start
-    print(f"  サイドウェイト比較調整: {comparison_time:.2f}秒")

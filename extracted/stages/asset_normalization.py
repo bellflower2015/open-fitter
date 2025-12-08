@@ -65,8 +65,6 @@ class AssetNormalizationStage:
                 pose_filepath=p.config_pair['pose_data'],
                 clothing_avatar_data_filepath=p.config_pair['clothing_avatar_data'],
             )
-            print(f"is_A_pose: {p.is_A_pose}")
-
         # Aポーズの場合、Aポーズ用ベースポーズを使用
         if (
             p.is_A_pose
@@ -87,7 +85,6 @@ class AssetNormalizationStage:
                     os.path.abspath(p.config_pair['base_avatar_data'])
                 )
                 base_pose_filepath = os.path.join(pose_dir, base_pose_filepath)
-                print(f"Applying target avatar base pose from {base_pose_filepath}")
                 add_pose_from_json(
                     p.base_armature,
                     base_pose_filepath,
@@ -95,21 +92,11 @@ class AssetNormalizationStage:
                     invert=False,
                 )
         # 中間pairではbase_armatureがNoneのためスキップ
-        base_pose_time = time.time()
-        print(f"ベースポーズ適用: {base_pose_time - stage_start_time:.2f}秒")
-
         # ウェイト転送セットアップ（最終pairのみ - Body.BaseAvatarが必要）
-        print("Status: ウェイト転送セットアップ中")
-        print(f"Progress: {(p.pair_index + 0.25) / p.total_pairs * 0.9:.3f}")
         if is_final_pair:
             setup_weight_transfer()
         # 中間pairではBody.BaseAvatarが存在しないためスキップ
-        setup_time = time.time()
-        print(f"ウェイト転送セットアップ: {setup_time - base_pose_time:.2f}秒")
-
         # ベースメッシュ処理（最終pairのみ - base_meshが必要）
-        print("Status: ベースアバターウェイト更新中")
-        print(f"Progress: {(p.pair_index + 0.3) / p.total_pairs * 0.9:.3f}")
         if is_final_pair:
             # ベースメッシュの空頂点グループを削除
             remove_empty_vertex_groups(p.base_mesh)
@@ -127,10 +114,9 @@ class AssetNormalizationStage:
                 apply_bone_name_conversion(
                     p.clothing_armature, p.clothing_meshes, name_conv_data
                 )
-                print(f"ボーン名前変更処理完了: {p.args.name_conv}")
-            except Exception as e:
-                print(f"Warning: ボーン名前変更処理でエラーが発生しました: {e}")
-
+            except Exception:
+                pass  # ボーン名変換失敗を無視
+                
         # 衣装ボーン名の正規化
         normalize_clothing_bone_names(
             p.clothing_armature,
@@ -152,5 +138,3 @@ class AssetNormalizationStage:
             normalize_bone_weights(p.base_mesh, p.base_avatar_data)
         # 中間pairではbase_meshがNoneのためスキップ
 
-        p.base_weights_time = time.time()
-        print(f"ベースアバターウェイト更新: {p.base_weights_time - setup_time:.2f}秒")

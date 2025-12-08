@@ -69,7 +69,6 @@ def process_blendshape_fields_with_rigid_transform(obj, field_data_path, base_av
             field_path = os.path.join(os.path.dirname(field_data_path), blend_field["filePath"])
             
             if os.path.exists(field_path):
-                print(f"Applying blend shape field for {label} with rigid transform")
                 # フィールドデータの読み込み
                 field_info_blend = get_deformation_field_multi_step(field_path)
                 blend_points = field_info_blend['all_field_points']
@@ -104,7 +103,6 @@ def process_blendshape_fields_with_rigid_transform(obj, field_data_path, base_av
                 for i in range(len(deformed_vertices)):
                     displacement = deformed_positions[i] - (obj.matrix_world @ Vector(deformed_vertices[i]))
                     if np.any(np.abs(displacement) > 1e-5):  # 微小な変位は無視
-                        print(f"blendShapeFields {label} world_displacement: {displacement}")
                         has_displacement = True
                         break
 

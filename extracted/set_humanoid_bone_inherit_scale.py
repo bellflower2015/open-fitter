@@ -36,8 +36,3 @@ def set_humanoid_bone_inherit_scale(armature_obj: bpy.types.Object, avatar_data:
     
     # ObjectModeに戻る
     bpy.ops.object.mode_set(mode='OBJECT')
-    
-    if modified_count > 0:
-        print(f"{modified_count}個のHumanoidボーンのInherit ScaleをAverageに設定しました")
-    else:
-        print("変更すべきボーンがありませんでした")

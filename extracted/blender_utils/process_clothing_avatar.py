@@ -49,12 +49,10 @@ class _ClothingAvatarContext:
             obj_name = obj.name
             try:
                 bpy.data.objects.remove(obj, do_unlink=True)
-                print(f"Removed inactive object: {obj_name}")
-            except Exception as e:
-                print(f"Failed to remove object {obj_name}: {e}")
-
+            except Exception:
+                pass  # 削除失敗を無視
+                
     def load_avatar_data(self):
-        print(f"Loading clothing avatar data from {self.clothing_avatar_data_path}")
         with open(self.clothing_avatar_data_path, 'r', encoding='utf-8') as f:
             self.clothing_avatar_data = json.load(f)
 
@@ -85,7 +83,6 @@ class _ClothingAvatarContext:
         if not self.target_meshes:
             return
         target_mesh_list = [name for name in self.target_meshes.split(';')]
-        print(f"Target mesh list: {target_mesh_list}")
         filtered_meshes = []
         for obj in self.clothing_meshes:
             if obj.name in target_mesh_list:
@@ -93,7 +90,6 @@ class _ClothingAvatarContext:
             else:
                 obj_name = obj.name
                 bpy.data.objects.remove(obj, do_unlink=True)
-                print(f"Removed non-target mesh: {obj_name}")
         if not filtered_meshes:
             raise Exception(f"No target meshes found. Specified: {self.target_meshes}")
         self.clothing_meshes = filtered_meshes
@@ -117,7 +113,6 @@ class _ClothingAvatarContext:
     def process_mesh_renderers(self):
         if not self.mesh_renderers:
             return
-        print(f"Processing mesh renderers: {self.mesh_renderers}")
         for mesh_name, parent_name in self.mesh_renderers.items():
             mesh_obj = next((obj for obj in bpy.data.objects if obj.type == 'MESH' and obj.name == mesh_name), None)
             if not mesh_obj:

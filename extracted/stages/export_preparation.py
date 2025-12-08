@@ -72,10 +72,6 @@ class ExportPreparationStage:
     def _apply_blendshape_settings(self, p, time):
         """ブレンドシェイプ設定を適用"""
         print("Status: ブレンドシェイプ設定中")
-        print(f"Progress: {(p.pair_index + 0.96) / p.total_pairs * 0.9:.3f}")
-
-        blendshape_start = time.time()
-
         if "clothingBlendShapeSettings" in p.config_pair['config_data']:
             blend_shape_settings = p.config_pair['config_data']["clothingBlendShapeSettings"]
 
@@ -94,16 +90,9 @@ class ExportPreparationStage:
                                 obj.data.shape_keys.key_blocks[shape_key_name].value = value / 100.0
                                 print(f"Set blendshape '{shape_key_name}' on {obj.name} to {value/100.0}")
 
-        blendshape_end = time.time()
-        print(f"ブレンドシェイプ設定: {blendshape_end - blendshape_start:.2f}秒")
-
     def _update_cloth_metadata(self, p, time):
         """クロスメタデータを更新"""
         print("Status: クロスメタデータ更新中")
-        print(f"Progress: {(p.pair_index + 0.97) / p.total_pairs * 0.9:.3f}")
-
-        metadata_update_start = time.time()
-
         if p.args.cloth_metadata and os.path.exists(p.args.cloth_metadata):
             try:
                 with open(p.args.cloth_metadata, 'r', encoding='utf-8') as f:
@@ -114,20 +103,12 @@ class ExportPreparationStage:
                     p.vertex_index_mapping,
                 )
             except Exception as e:
-                print(f"Error processing cloth metadata: {e}")
                 import traceback
                 traceback.print_exc()
-
-        metadata_update_end = time.time()
-        print(f"クロスメタデータ更新: {metadata_update_end - metadata_update_start:.2f}秒")
 
     def _preprocess_for_export(self, p, time):
         """エクスポート前処理"""
         print("Status: FBXエクスポート前処理中")
-        print(f"Progress: {(p.pair_index + 0.975) / p.total_pairs * 0.9:.3f}")
-
-        preprocess_start = time.time()
-
         # BlendShapeラベルの再設定
         p.blend_shape_labels = []
         if p.args.blend_shapes:
@@ -184,9 +165,6 @@ class ExportPreparationStage:
             p.base_avatar_data,
         )
 
-        preprocess_end = time.time()
-        print(f"FBXエクスポート前処理: {preprocess_end - preprocess_start:.2f}秒")
-
     def _export_fbx(self, p, time):
         """FBXエクスポート"""
         # オブジェクト選択
@@ -205,9 +183,4 @@ class ExportPreparationStage:
 
         # FBXエクスポート
         print("Status: FBXエクスポート中")
-        print(f"Progress: {(p.pair_index + 0.98) / p.total_pairs * 0.9:.3f}")
-
-        export_start = time.time()
         export_fbx(p.args.output)
-        export_end = time.time()
-        print(f"FBXエクスポート: {export_end - export_start:.2f}秒")

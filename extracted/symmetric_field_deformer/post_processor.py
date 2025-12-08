@@ -54,8 +54,6 @@ def execute_deferred_transitions(ctx):
             ctx.label_to_target_shape_key_name[created_shape_key_name] = (
                 created_shape_key_name
             )
-            print(f"Added created shape key: {created_shape_key_name}")
-
 
 def apply_masks_and_cleanup(ctx):
     """

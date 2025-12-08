@@ -71,7 +71,6 @@ class WeightTransferContext:
         self.weights_b = {}
 
     def run(self):
-        print(f"処理開始: {self.target_obj.name}")
         (
             self.humanoid_to_bone,
             self.bone_to_humanoid,
@@ -97,8 +96,6 @@ class WeightTransferContext:
         restore_head_weights(self)
         apply_metadata_fallback(self)
         total_time = time.time() - self.start_time
-        print(f"処理完了: {self.target_obj.name} - 合計時間: {total_time:.2f}秒")
-
 
 def process_weight_transfer(target_obj, armature, base_avatar_data, clothing_avatar_data, field_path, clothing_armature, cloth_metadata=None):
     """Orchestrator that delegates weight transfer to a stateful context."""

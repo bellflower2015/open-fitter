@@ -198,8 +198,6 @@ def calculate_distance_based_weights(source_obj_name, target_obj_name, vertex_gr
     # BVHTreeを構築
     bvh = BVHTree.FromPolygons(target_verts, target_polys)
     
-    print("距離計算とウェイト設定中...")
-    
     # ソースオブジェクトの各頂点について処理
     source_matrix = source_obj.matrix_world
     source_eval = source_obj.evaluated_get(depsgraph)
@@ -215,7 +213,6 @@ def calculate_distance_based_weights(source_obj_name, target_obj_name, vertex_gr
         location, normal, index, distance = bvh.find_nearest(world_co)
         
         if location is None:
-            print(f"警告: 頂点 {i} の最近接面が見つかりません")
             distance = max_distance
         
         # 距離に基づいてウェイトを計算
@@ -231,11 +228,6 @@ def calculate_distance_based_weights(source_obj_name, target_obj_name, vertex_gr
         
         # 頂点グループにウェイトを設定
         vertex_group.add([i], weight, 'REPLACE')
-    
-    print(f"完了: {len(weights)} 個の頂点にウェイトを設定しました")
-    print(f"最小ウェイト: {min(weights):.4f}")
-    print(f"最大ウェイト: {max(weights):.4f}")
-    print(f"平均ウェイト: {np.mean(weights):.4f}")
     
     return True
 
@@ -275,7 +267,6 @@ class _OverlapNormalizationContext:
         overlapping_verts_ids = _find_overlapping_vertex_indices(overlap_attr)
 
         if not overlapping_verts_ids:
-            print(f"警告: {mesh_obj.name}に重なっている頂点が見つかりません。処理をスキップします。")
             bpy.data.objects.remove(work_obj, do_unlink=True)
             return
 
@@ -314,8 +305,6 @@ class _OverlapNormalizationContext:
         )
 
         bpy.data.objects.remove(work_obj, do_unlink=True)
-        print(f"{mesh_obj.name}の{updated_count}個の頂点のウェイトを正規化しました。")
-
     def process_all(self):
         if not self.valid_meshes:
             print(
@@ -492,8 +481,6 @@ def normalize_overlapping_vertices_weights(clothing_meshes, base_avatar_data, ov
         ctx.process_all()
     finally:
         ctx.restore_active()
-        print("重なっている頂点のウェイト正規化が完了しました。")
-
 # Merged from create_distance_falloff_transfer_mask.py
 
 def create_distance_falloff_transfer_mask(obj: bpy.types.Object, 

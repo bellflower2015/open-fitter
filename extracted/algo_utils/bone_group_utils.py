@@ -88,9 +88,6 @@ def create_hinge_bone_group(obj: bpy.types.Object, armature: bpy.types.Object, a
         bone = armature.pose.bones.get(bone_name)
         if bone.parent and bone.parent.name in bone_groups:
             group_index = obj.vertex_groups.find(bone_name)
-            print(f"Processing hinge bone: {bone_name}")
-            print(f"Bone parent: {bone.parent.name}")
-            print(f"Group index: {group_index}")
             if group_index != -1:
                 bone_head = armature.matrix_world @ bone.head
                 neighbor_indices = kdtree.query_ball_point(bone_head, 0.01)

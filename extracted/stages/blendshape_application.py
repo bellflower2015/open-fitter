@@ -46,8 +46,6 @@ class BlendShapeApplicationStage:
         time = p.time_module
 
         print("Status: BlendShape用 Deformation Field適用中")
-        print(f"Progress: {(p.pair_index + 0.33) / p.total_pairs * 0.9:.3f}")
-
         # BlendShapeラベルの解析
         p.blend_shape_labels = (
             p.config_pair['blend_shapes'].split(',')
@@ -72,10 +70,7 @@ class BlendShapeApplicationStage:
                     p.config_pair['blend_shape_values'],
                 )
 
-        blendshape_time = time.time()
         # base_weights_timeがない場合（Phase 1）はstart_timeを使用
         reference_time = p.base_weights_time if p.base_weights_time else p.start_time
-        print(f"BlendShape用 Deformation Field適用: {blendshape_time - reference_time:.2f}秒")
-
         # 次のステージで使用するためのタイムスタンプを保存
-        p.blendshape_time = blendshape_time
+        p.blendshape_time = time.time()

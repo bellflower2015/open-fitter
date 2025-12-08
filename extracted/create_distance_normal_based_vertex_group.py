@@ -47,20 +47,12 @@ def create_distance_normal_based_vertex_group(body_obj, cloth_obj, distance_thre
     
     # BVHツリーを作成（高速な最近傍点検索のため）
     # モディファイア適用後のターゲットメッシュを取得
-    body_bm_time_start = time.time()
     body_bm = get_evaluated_mesh(body_obj)
     body_bm.verts.ensure_lookup_table()
     body_bm.faces.ensure_lookup_table()
     body_bm.normal_update()
-    body_bm_time = time.time() - body_bm_time_start
-    print(f"  Body BMesh作成: {body_bm_time:.2f}秒")
-
     # ターゲットメッシュのBVHツリーを作成
-    bvh_time_start = time.time()
     bvh_tree = BVHTree.FromBMesh(body_bm)
-    bvh_time = time.time() - bvh_time_start
-    print(f"  BVHツリー作成: {bvh_time:.2f}秒")
-    
     # 頂点グループがまだ存在しない場合は作成
     if new_group_name not in cloth_obj.vertex_groups:
         cloth_obj.vertex_groups.new(name=new_group_name)
@@ -70,20 +62,15 @@ def create_distance_normal_based_vertex_group(body_obj, cloth_obj, distance_thre
     angle_threshold_rad = math.radians(angle_threshold)
     
     # モディファイア適用後のソースメッシュを取得
-    cloth_bm_time_start = time.time()
     cloth_bm = get_evaluated_mesh(cloth_obj)
     cloth_bm.verts.ensure_lookup_table()
     cloth_bm.faces.ensure_lookup_table()
     cloth_bm.normal_update()
-    cloth_bm_time = time.time() - cloth_bm_time_start
-    print(f"  Cloth BMesh作成: {cloth_bm_time:.2f}秒")
-    
     # トランスフォームマトリックスをキャッシュ（繰り返しの計算を避けるため）
     body_normal_matrix = body_obj.matrix_world.inverted().transposed()
     cloth_normal_matrix = cloth_obj.matrix_world.inverted().transposed()
     
     # 修正した法線を格納する辞書
-    adjusted_normals_time_start = time.time()
     adjusted_normals = {}
     
     # 衣装メッシュの各頂点の法線処理（逆転の必要があるかチェック）
@@ -117,11 +104,7 @@ def create_distance_normal_based_vertex_group(body_obj, cloth_obj, distance_thre
         else:
             # 最近傍点が見つからない場合は元の法線を使用
             adjusted_normals[i] = original_normal_world
-    adjusted_normals_time = time.time() - adjusted_normals_time_start
-    print(f"  法線調整: {adjusted_normals_time:.2f}秒")
-    
     # 面の中心点と面積を事前計算してキャッシュ
-    face_cache_time_start = time.time()
     face_centers = []
     face_areas = {}
     face_adjusted_normals = {}
@@ -144,11 +127,7 @@ def create_distance_normal_based_vertex_group(body_obj, cloth_obj, distance_thre
         for v in face.verts:
             face_normal += adjusted_normals[v.index]
         face_adjusted_normals[face.index] = face_normal.normalized()
-    face_cache_time = time.time() - face_cache_time_start
-    print(f"  面キャッシュ作成: {face_cache_time:.2f}秒")
-    
     # 衣装メッシュの面に対してKDTreeを構築
-    kdtree_time_start = time.time()
     # size = len(cloth_bm.faces)
     # kd = mathutils.kdtree.KDTree(size)
     
@@ -164,17 +143,10 @@ def create_distance_normal_based_vertex_group(body_obj, cloth_obj, distance_thre
         vertex_positions.append(vertex.co)
     vertex_kd = cKDTree(vertex_positions)
     
-    kdtree_time = time.time() - kdtree_time_start
-    print(f"  KDTree構築: {kdtree_time:.2f}秒")
-    
     # 各頂点から一定距離内に面の一部が存在する面を検索するための準備完了
-    normal_avg_time_start = time.time()
-    normal_avg_time = time.time() - normal_avg_time_start
-    print(f"  面の近傍検索準備完了: {normal_avg_time:.2f}秒")
     # ----------------------------------
     
     # 衣装メッシュの各頂点に対して処理
-    weight_calc_time_start = time.time()
     for i, vertex in enumerate(cloth_bm.verts):
         # ワールド座標系での頂点位置
         cloth_vert_world = vertex.co
@@ -272,9 +244,6 @@ def create_distance_normal_based_vertex_group(body_obj, cloth_obj, distance_thre
         
         # 頂点グループにウェイトを設定
         vertex_group.add([i], weight, 'REPLACE')
-    weight_calc_time = time.time() - weight_calc_time_start
-    print(f"  ウェイト計算: {weight_calc_time:.2f}秒")
-    
     # 頂点グループをアクティブに設定
     cloth_obj.vertex_groups.active_index = vertex_group.index
     
@@ -282,14 +251,10 @@ def create_distance_normal_based_vertex_group(body_obj, cloth_obj, distance_thre
     bpy.ops.object.mode_set(mode='WEIGHT_PAINT')
     
     # スムージング処理を実行（アクティブな頂点グループに適用される）
-    smooth_time_start = time.time()
     bpy.ops.object.vertex_group_smooth(factor=0.3, repeat=10, expand=0.25)
     
     # クリーニング処理も適用
     bpy.ops.object.vertex_group_clean(group_select_mode='ACTIVE', limit=0.5)
-    smooth_time = time.time() - smooth_time_start
-    print(f"  スムージング処理: {smooth_time:.2f}秒")
-
     apply_max_filter_to_vertex_group(cloth_obj, new_group_name, filter_radius=0.01, filter_mask=filter_mask)
     apply_min_filter_to_vertex_group(cloth_obj, new_group_name, filter_radius=0.01, filter_mask=filter_mask)
     
@@ -301,5 +266,4 @@ def create_distance_normal_based_vertex_group(body_obj, cloth_obj, distance_thre
     cloth_bm.free()
     
     total_time = time.time() - start_time
-    print(f"{new_group_name}頂点グループを作成しました (合計時間: {total_time:.2f}秒)")
     return vertex_group

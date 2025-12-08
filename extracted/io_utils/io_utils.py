@@ -76,7 +76,6 @@ def load_avatar_data_for_blendshape_analysis(avatar_data_path: str) -> dict:
         with open(avatar_data_path, 'r', encoding='utf-8') as f:
             return json.load(f)
     except Exception as e:
-        print(f"Error loading avatar data {avatar_data_path}: {e}")
         return {}
 
 # Merged from load_cloth_metadata.py
@@ -151,10 +150,6 @@ def load_cloth_metadata(filepath):
                 vertex_index_mapping[mesh_name] = mesh_vertex_mapping
                 
                 print(f"Processed {len(vertex_max_distances)} vertices for mesh {mesh_name}")
-                print(f"Original vertex count: {len(metadata['vertexData'])}")
-                print(f"Original unity position count: {len(unity_positions)}")
-                print(f"Mapped vertex count: {len(vertex_max_distances)}")
-
                 # マッピングできなかった頂点を特定
                 mapped_indices = set(int(idx) for idx in vertex_max_distances.keys())
                 unmapped_indices = set(range(len(vertices_world))) - mapped_indices
@@ -171,18 +166,9 @@ def load_cloth_metadata(filepath):
                     # マッピングできなかった頂点をグループに追加
                     for idx in unmapped_indices:
                         debug_group.add([idx], 1.0, 'REPLACE')
-                    
-                    print(f"Created vertex group '{debug_group_name}' with {len(unmapped_indices)} vertices")
-                    
-                    # デバッグ情報
-                    print(f"First 5 unmapped vertices world positions:")
-                    for idx in list(unmapped_indices)[:5]:
-                        print(f"Vertex {idx}: {vertices_world[idx]}")
-            
             return metadata_by_mesh, vertex_index_mapping
             
     except Exception as e:
-        print(f"Failed to load cloth metadata: {e}")
         import traceback
         traceback.print_exc()
         return {}, {}
@@ -209,10 +195,8 @@ def load_deformation_field_num_steps(field_file_path: str, config_dir: str) -> i
             field_data = np.load(field_file_path, allow_pickle=True)
             return int(field_data.get('num_steps', 1))
         else:
-            print(f"Warning: Deformation field file not found: {field_file_path}")
             return 1
     except Exception as e:
-        print(f"Warning: Failed to load num_steps from {field_file_path}: {e}")
         return 1
 
 # Merged from load_mesh_material_data.py
@@ -233,8 +217,6 @@ def load_mesh_material_data(filepath):
     try:
         with open(filepath, 'r') as f:
             data = json.load(f)
-            print(f"Loaded mesh material data from: {filepath}")
-            
             for mesh_data in data.get('meshMaterials', []):
                 mesh_name = mesh_data['meshName']
                 
@@ -248,8 +230,6 @@ def load_mesh_material_data(filepath):
                 if not mesh_obj:
                     print(f"Warning: Mesh {mesh_name} not found in Blender scene")
                     continue
-                
-                print(f"Processing mesh: {mesh_name}")
                 
                 # 各サブメッシュを処理
                 for sub_mesh_idx, sub_mesh_data in enumerate(mesh_data['subMeshes']):
@@ -265,8 +245,6 @@ def load_mesh_material_data(filepath):
                         material = bpy.data.materials.new(name=material_name)
                         # デフォルトのマテリアル設定
                         material.use_nodes = True
-                        print(f"Created material: {material_name}")
-                    
                     # 面から該当するマテリアルインデックスを特定し、そのスロットのマテリアルを入れ替え
                     material_index = find_material_index_from_faces(mesh_obj, faces_data)
                     if material_index is not None:
@@ -276,12 +254,9 @@ def load_mesh_material_data(filepath):
                         
                         # 該当するマテリアルスロットを入れ替え
                         mesh_obj.data.materials[material_index] = material
-                        print(f"Replaced material at index {material_index} with {material_name}")
-                    else:
-                        print(f"Warning: Could not find matching faces for material {material_name}")
                     
-    except Exception as e:
-        print(f"Error loading mesh material data: {e}")
+    except Exception:
+        pass  # マテリアル読み込み失敗を無視
 
 # Merged from load_vertex_group.py
 
@@ -292,7 +267,6 @@ def load_vertex_group(obj, filepath):
     group_name = payload.get("vertex_group_name")
     weights = payload.get("weights", [])
     if not group_name:
-        print("JSON に頂点グループ名が含まれていません。")
         return group_name
 
     vg = obj.vertex_groups.get(group_name)
@@ -314,9 +288,6 @@ def load_vertex_group(obj, filepath):
         vg.add([vidx], weight, 'REPLACE')
 
     obj.vertex_groups.active = vg
-    print(f"{group_name} を {filepath} から復元しました。")
-    if missing_vertices:
-        print(f"存在しない頂点インデックス: {missing_vertices}")
     return group_name
 
 # Merged from pose_state.py
@@ -602,10 +573,10 @@ def update_cloth_metadata(metadata_dict: dict, output_path: str, vertex_index_ma
             else:
                 print(f"Warning: No mapping found for Unity vertex {i} in {mesh_name}")
 
+
     # 更新したデータを保存
     try:
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(metadata_dict, f, indent=4)
-        print(f"Updated cloth metadata saved to {output_path}")
-    except Exception as e:
-        print(f"Error saving cloth metadata: {e}")
+    except Exception:
+        pass  # 保存失敗を無視

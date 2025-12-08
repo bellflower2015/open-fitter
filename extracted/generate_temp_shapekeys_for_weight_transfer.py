@@ -39,7 +39,6 @@ def generate_temp_shapekeys_for_weight_transfer(obj: bpy.types.Object, armature_
         restore_shape_key_state(obj, original_shape_key_state)
 
         # 左右の腕全体のボーンにY軸回転を適用
-        print("  左右の腕全体のボーンにY軸回転を適用")
         bpy.context.view_layer.objects.active = armature_obj
         bpy.ops.object.mode_set(mode='POSE')
         
@@ -148,7 +147,6 @@ def generate_temp_shapekeys_for_weight_transfer(obj: bpy.types.Object, armature_
     restore_shape_key_state(obj, original_shape_key_state)
 
     # 左右の足全体のボーンにY軸回転を適用
-    print("  左右の足全体のボーンにY軸回転を適用")
     bpy.context.view_layer.objects.active = armature_obj
     bpy.ops.object.mode_set(mode='POSE')
     

@@ -51,9 +51,6 @@ def load_base_file(filepath: str) -> None:
 アバターデータの読み込みユーティリティ
 """
 
-# Set to True to force fallback for Template avatar (for testing)
-FORCE_TEMPLATE_FALLBACK = True
-
 
 def _is_template_avatar_data_path(filepath: str) -> bool:
     """Check if filepath refers to Template avatar data."""
@@ -66,47 +63,30 @@ def _is_template_avatar_data_path(filepath: str) -> bool:
 def load_avatar_data(filepath: str) -> dict:
     """Load and parse avatar data from JSON file.
     
-    For Template avatar, uses fallback data if the file doesn't exist
-    or contains minimal/empty data.
+    For Template avatar, always uses generated fallback data
+    (the original avatar_data_template.json is proprietary).
     """
     is_template = _is_template_avatar_data_path(filepath)
     
-    # Force fallback for testing
-    if is_template and FORCE_TEMPLATE_FALLBACK:
+    # Template avatar: always use fallback (proprietary file not available)
+    if is_template:
         from template_avatar_fallback import get_template_avatar_data
-        print(f"[DEBUG] FORCE_TEMPLATE_FALLBACK: Using Template avatar fallback data")
+        print(f"[DEBUG] Using Template avatar fallback data")
         return get_template_avatar_data()
     
-    # Try to load from file first
+    # Non-Template: load from file
     try:
         if os.path.exists(filepath):
             with open(filepath, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                # Check if this is valid avatar data (has required fields)
                 if data and data.get('humanoidBones'):
                     return data
-                # Fall through to fallback for empty/minimal files
         
-        # Use fallback for Template avatar if file missing or invalid
-        if is_template:
-            from template_avatar_fallback import get_template_avatar_data
-            print(f"[DEBUG] Using Template avatar fallback data (file: {filepath})")
-            return get_template_avatar_data()
-        
-        # Non-Template: require valid file
         raise FileNotFoundError(f"Avatar data file not found: {filepath}")
         
     except json.JSONDecodeError as e:
-        if is_template:
-            from template_avatar_fallback import get_template_avatar_data
-            print(f"[DEBUG] Using Template avatar fallback data (JSON error: {e})")
-            return get_template_avatar_data()
         raise Exception(f"Failed to parse avatar data JSON: {str(e)}")
     except Exception as e:
-        if is_template and "not found" not in str(e).lower():
-            from template_avatar_fallback import get_template_avatar_data
-            print(f"[DEBUG] Using Template avatar fallback data (error: {e})")
-            return get_template_avatar_data()
         raise Exception(f"Failed to load avatar data: {str(e)}")
 
 

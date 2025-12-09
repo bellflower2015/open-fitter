@@ -78,13 +78,12 @@ class AssetLoadingStage:
             print(f"[DEBUG] Avatar data loaded successfully")
 
         # Templateアバターの場合、フォールバックポーズデータを使用
-        # (pose_basis_template.jsonはプロプライエタリファイルで存在しないため)
+        # (pose_basis_template.jsonは使用不可のため常にフォールバック)
         if p.base_avatar_data.get("name", None) == "Template":
             # basePoseをフォールバック用の特殊値に設定
-            # （実際のポーズ適用時にtemplate_pose_fallbackモジュールを使用）
             p.base_avatar_data['basePose'] = "__TEMPLATE_FALLBACK__"
             p.base_avatar_data['basePoseA'] = "__TEMPLATE_FALLBACK__"
-            print(f"[DEBUG] Template avatar detected: using fallback pose data")
+            print(f"[DEBUG] Template avatar: using fallback pose data")
 
         # 衣装データ処理
         print(f"[DEBUG] Loading clothing FBX: {p.config_pair['input_clothing_fbx_path']}")

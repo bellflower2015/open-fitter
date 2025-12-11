@@ -12,15 +12,31 @@ from math_utils.geometry_utils import list_to_matrix
 from mathutils import Euler, Matrix, Vector
 
 
+def is_fallback_marker(path):
+    """Check if path is a fallback marker (not a real file path)."""
+    if not path:
+        return False
+    markers = ['UNUSED', 'FALLBACK', 'NONE', 'SKIP', '__']
+    upper_path = path.upper()
+    return any(upper_path.startswith(m) or m in upper_path for m in markers)
+
+
 def apply_initial_pose_to_armature(armature_obj, init_pose_filepath, clothing_avatar_data_filepath):
     """
     Apply initial pose from JSON to the armature.
     
     Parameters:
         armature_obj: Target armature object
-        init_pose_filepath: Path to initial pose JSON file
+        init_pose_filepath: Path to initial pose JSON file, or fallback marker (e.g., 'UNUSED', '__IDENTITY__')
+                           If fallback marker is provided, assumes identity matrix (no transformation)
         clothing_avatar_data_filepath: Path to avatar data JSON file
     """
+    # Fallback: if marker like UNUSED, __IDENTITY__, etc. is provided,
+    # assume delta_matrix is identity matrix and skip processing
+    if is_fallback_marker(init_pose_filepath):
+        print(f"[INFO] init_pose is fallback marker '{init_pose_filepath}', assuming identity matrix (no transformation)")
+        return
+    
     if not init_pose_filepath or not os.path.exists(init_pose_filepath):
         return
     

@@ -63,13 +63,17 @@ def parse_args():
     
     # Validate basic file paths
     required_paths = [
-        args.input, args.base, 
-        args.init_pose
+        args.input, args.base
     ]
     for path in required_paths:
         if not os.path.exists(path):
             print(f"Error: File not found: {path}")
             sys.exit(1)
+    
+    # Validate init_pose (allow fallback markers for identity matrix case)
+    if not is_fallback_marker(args.init_pose) and not os.path.exists(args.init_pose):
+        print(f"Error: Init pose file not found: {args.init_pose}")
+        sys.exit(1)
     
     # Validate base-fbx files:
     # - Fallback markers (UNUSED_TEMPLATE, etc.) are allowed without validation
